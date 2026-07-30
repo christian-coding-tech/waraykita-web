@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Waray Kita</title>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"><i class="fa-solid fa-handshake"></i></div>
+                <h2>Waray<span>Kita</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <p class="nav-label">Main</p>
+                <a href="{% url 'admin_dashboard' %}" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="#"><i class="fa-solid fa-users"></i> Users</a>
+                <a href="#"><i class="fa-solid fa-box"></i> Items</a>
+                <a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a>
+                <p class="nav-label">Management</p>
+                <a href="#"><i class="fa-solid fa-shield-halved"></i> Roles</a>
+                <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="#"><i class="fa-solid fa-database"></i> Database</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <div class="avatar">{{ user.username|first|upper }}</div>
+                    <div class="info">
+                        <p>{{ user.username }}</p>
+                        <small>Administrator</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Topbar -->
+            <header class="topbar">
+                <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                <h1>Admin Dashboard</h1>
+                <div class="topbar-right">
+                    <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">5</span></div>
+                    <div class="icon-btn"><i class="fa-solid fa-envelope"></i><span class="badge">3</span></div>
+                    <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Welcome Banner -->
+                <div class="welcome-banner">
+                    <div>
+                        <h2>Welcome back, {{ user.username }}!</h2>
+                        <p>You have admin privileges. Manage your platform from here.</p>
+                    </div>
+                    <i class="fa-solid fa-user-shield banner-icon"></i>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3>1,248</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fa-solid fa-box"></i></div>
+                        <div class="stat-info">
+                            <h3>356</h3>
+                            <p>Total Items</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="stat-info">
+                            <h3>89%</h3>
+                            <p>Activity Rate</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info">
+                            <h3>12</h3>
+                            <p>Reports</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Two Column -->
+                <div class="two-col">
+                    <!-- Recent Users Table -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Recent Users</h3>
+                            <a href="#">View All</a>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>juan_delacruz</td>
+                                        <td>juan@example.com</td>
+                                        <td>User</td>
+                                        <td><span class="status-badge active">Active</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>maria_santos</td>
+                                        <td>maria@example.com</td>
+                                        <td>User</td>
+                                        <td><span class="status-badge pending">Pending</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>pedro_reyes</td>
+                                        <td>pedro@example.com</td>
+                                        <td>Editor</td>
+                                        <td><span class="status-badge active">Active</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>ana_lim</td>
+                                        <td>ana@example.com</td>
+                                        <td>User</td>
+                                        <td><span class="status-badge inactive">Inactive</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>carlos_tan</td>
+                                        <td>carlos@example.com</td>
+                                        <td>Moderator</td>
+                                        <td><span class="status-badge active">Active</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Activity Feed -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Recent Activity</h3>
+                        </div>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="act-icon blue"><i class="fa-solid fa-user-plus"></i></div>
+                                <div class="act-info">
+                                    <p>New user registered</p>
+                                    <small>2 minutes ago</small>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="act-icon green"><i class="fa-solid fa-check"></i></div>
+                                <div class="act-info">
+                                    <p>Item approved</p>
+                                    <small>15 minutes ago</small>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="act-icon orange"><i class="fa-solid fa-pen"></i></div>
+                                <div class="act-info">
+                                    <p>Report submitted</p>
+                                    <small>1 hour ago</small>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="act-icon blue"><i class="fa-solid fa-key"></i></div>
+                                <div class="act-info">
+                                    <p>Password changed</p>
+                                    <small>3 hours ago</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Admin Quick Actions</h3>
+                    </div>
+                    <div class="quick-actions">
+                        <a href="#" class="quick-action">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Add User</span>
+                        </a>
+                        <a href="#" class="quick-action">
+                            <i class="fa-solid fa-box-open"></i>
+                            <span>Add Item</span>
+                        </a>
+                        <a href="#" class="quick-action">
+                            <i class="fa-solid fa-file-export"></i>
+                            <span>Export Report</span>
+                        </a>
+                        <a href="#" class="quick-action">
+                            <i class="fa-solid fa-database"></i>
+                            <span>Backup Data</span>
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

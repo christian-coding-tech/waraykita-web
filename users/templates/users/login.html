@@ -12,16 +12,30 @@
 </head>
 <body>
     <div class="container">
-        <!-- Login Form -->
+         <!-- Login Form -->
          <div class="form-box login">
-            <form action="#">
+            <form action="{% url 'login' %}" method="post">
+                {% csrf_token %}
                 <h1>Login</h1>
+                {% if messages %}
+                    <div class="alert-box">
+                        {% for message in messages %}
+                            {% if message.tags == 'success' %}
+                                <p class="alert-success"><i class="fa-solid fa-circle-check"></i> {{ message }}</p>
+                            {% elif message.tags == 'error' %}
+                                <p class="alert-error"><i class="fa-solid fa-circle-exclamation"></i> {{ message }}</p>
+                            {% else %}
+                                <p class="alert-info">{{ message }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 <div class="input-box">
-                    <input type="text" placeholder="Username" required>
+                    <input type="text" name="username" placeholder="Username" required>
                     <i class="fa-solid fa-user"></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" placeholder="Password" required>
+                    <input type="password" name="password" placeholder="Password" required>
                     <i class="fa-solid fa-lock"></i>
                 </div>
                 <div class="forgot-link">
@@ -37,19 +51,33 @@
          </div>
         <!-- Registration Form -->
          <div class="form-box register">
-            <form action="#">
+            <form action="{% url 'register' %}" method="post">
+                {% csrf_token %}
                 <h1>Register</h1>
+                {% if messages %}
+                    <div class="alert-box">
+                        {% for message in messages %}
+                            {% if message.tags == 'success' %}
+                                <p class="alert-success"><i class="fa-solid fa-circle-check"></i> {{ message }}</p>
+                            {% elif message.tags == 'error' %}
+                                <p class="alert-error"><i class="fa-solid fa-circle-exclamation"></i> {{ message }}</p>
+                            {% else %}
+                                <p class="alert-info">{{ message }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 <div class="input-box">
                     <i class="fa-solid fa-user"></i>
-                    <input type="text" placeholder="Username" required>
+                    <input type="text" name="username" placeholder="Username" required>
                 </div>
                 <div class="input-box">
                     <i class="fa-solid fa-envelope"></i>
-                    <input type="email" placeholder="Email" required>
+                    <input type="email" name="email" placeholder="Email" required>
                 </div>
                 <div class="input-box">
                     <i class="fa-solid fa-lock"></i>
-                    <input type="password" placeholder="Password" required>
+                    <input type="password" name="password" placeholder="Password" required>
                 </div>
                 <button type="submit" class="btn">Register</button>
                 <p>or Register with social platforms</p>

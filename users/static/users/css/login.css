@@ -206,3 +206,41 @@ form {
     border: 2px solid #fff;
     box-shadow: none;
 }
+
+.alert-box {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.alert-box p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.alert-box p:last-child {
+    margin-bottom: 0;
+}
+
+.alert-success {
+    background: #e3f9ec;
+    color: #1a9d52;
+    border: 1px solid #aee9c5;
+}
+
+.alert-error {
+    background: #ffe0e0;
+    color: #d33;
+    border: 1px solid #ffb3b3;
+}
+
+.alert-info {
+    background: #e7f0ff;
+    color: #3a6fd8;
+    border: 1px solid #b9d0ff;
+}
