@@ -19,7 +19,7 @@
             <nav class="sidebar-nav">
                 <p class="nav-label">Main</p>
                 <a href="{% url 'admin_dashboard' %}" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-                <a href="#"><i class="fa-solid fa-users"></i> Users</a>
+                <a href="{% url 'manage_users' %}"><i class="fa-solid fa-users"></i> Users</a>
                 <a href="#"><i class="fa-solid fa-box"></i> Items</a>
                 <a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a>
                 <p class="nav-label">Management</p>
@@ -100,7 +100,7 @@
                     <div class="panel">
                         <div class="panel-header">
                             <h3>Recent Users</h3>
-                            <a href="#">View All</a>
+                            <a href="{% url 'manage_users' %}">View All</a>
                         </div>
                         <div class="table-wrap">
                             <table>
@@ -192,7 +192,7 @@
                         <h3>Admin Quick Actions</h3>
                     </div>
                     <div class="quick-actions">
-                        <a href="#" class="quick-action">
+                        <a href="{% url 'manage_users' %}" class="quick-action">
                             <i class="fa-solid fa-user-plus"></i>
                             <span>Add User</span>
                         </a>
