@@ -45,9 +45,70 @@
             <header class="topbar">
                 <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
                 <h1>System Settings</h1>
-                <div class="topbar-right">
-                    <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">2</span></div>
-                    <div class="icon-btn"><i class="fa-solid fa-envelope"></i></div>
+<div class="topbar-right">
+                    <div class="icon-btn" onclick="toggleDropdown('notifDropdown', this)">
+                        <i class="fa-solid fa-bell"></i><span class="badge" id="notifBadge">2</span>
+                        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-bell"></i> Notifications</h4>
+                                <button class="notif-clear" onclick="clearNotifications()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="notifList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-box"></i></div>
+                                    <div class="notif-content">
+                                        <p>New product available: Check out the latest items!</p>
+                                        <small>5 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-tag"></i></div>
+                                    <div class="notif-content">
+                                        <p>Price drop on an item in your favorites</p>
+                                        <small>1 hour ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-star"></i></div>
+                                    <div class="notif-content">
+                                        <p>Weekly picks are now live</p>
+                                        <small>Yesterday</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more notifications');">View All Notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-btn" onclick="toggleDropdown('msgDropdown', this)">
+                        <i class="fa-solid fa-envelope"></i>
+                        <div class="notif-dropdown" id="msgDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-envelope"></i> Messages</h4>
+                                <button class="notif-clear" onclick="clearMessages()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="msgList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-headset"></i></div>
+                                    <div class="notif-content">
+                                        <p>Waray Kita Support: Welcome to your account!</p>
+                                        <small>Just now</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-circle-info"></i></div>
+                                    <div class="notif-content">
+                                        <p>Tip: Use the Explore tab to discover new products</p>
+                                        <small>2 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more messages');">View All Messages</a>
+                            </div>
+                        </div>
+                    </div>
                     <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
                 </div>
             </header>
@@ -525,6 +586,40 @@
                 setTimeout(function() { toast.remove(); }, 300);
             }, 2500);
         }
+
+// ============================================================
+        // Notification & Message Dropdowns
+        // ============================================================
+        function toggleDropdown(id, el) {
+            document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                if (d.id !== id) d.classList.remove('show');
+            });
+            const dd = document.getElementById(id);
+            if (dd) dd.classList.toggle('show');
+        }
+
+        function clearNotifications() {
+            const items = document.querySelectorAll('#notifList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All notifications marked as read');
+        }
+
+        function clearMessages() {
+            const items = document.querySelectorAll('#msgList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            showToast('All messages marked as read');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                    d.classList.remove('show');
+                });
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', loadSettings);
     </script>

@@ -45,9 +45,91 @@
             <header class="topbar">
                 <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
                 <h1>System Settings</h1>
-                <div class="topbar-right">
-                    <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">5</span></div>
-                    <div class="icon-btn"><i class="fa-solid fa-envelope"></i><span class="badge">3</span></div>
+<div class="topbar-right">
+                    <div class="icon-btn" onclick="toggleDropdown('notifDropdown', this)">
+                        <i class="fa-solid fa-bell"></i><span class="badge" id="notifBadge">5</span>
+                        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-bell"></i> Notifications</h4>
+                                <button class="notif-clear" onclick="clearNotifications()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="notifList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-user-plus"></i></div>
+                                    <div class="notif-content">
+                                        <p>New user registered</p>
+                                        <small>2 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-check"></i></div>
+                                    <div class="notif-content">
+                                        <p>Item approved</p>
+                                        <small>15 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                    <div class="notif-content">
+                                        <p>Report submitted</p>
+                                        <small>1 hour ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon red"><i class="fa-solid fa-box"></i></div>
+                                    <div class="notif-content">
+                                        <p>Product out of stock</p>
+                                        <small>3 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more notifications');">View All Notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-btn" onclick="toggleDropdown('msgDropdown', this)">
+                        <i class="fa-solid fa-envelope"></i><span class="badge" id="msgBadge">3</span>
+                        <div class="notif-dropdown" id="msgDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-envelope"></i> Messages</h4>
+                                <button class="notif-clear" onclick="clearMessages()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="msgList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-headset"></i></div>
+                                    <div class="notif-content">
+                                        <p>Support: Your ticket #1024 was resolved</p>
+                                        <small>10 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-user"></i></div>
+                                    <div class="notif-content">
+                                        <p>New inquiry from juan@gmail.com</p>
+                                        <small>32 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-bell"></i></div>
+                                    <div class="notif-content">
+                                        <p>System update scheduled tonight</p>
+                                        <small>2 hours ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon red"><i class="fa-solid fa-exclamation"></i></div>
+                                    <div class="notif-content">
+                                        <p>Payment issue reported by a user</p>
+                                        <small>Yesterday</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more messages');">View All Messages</a>
+                            </div>
+                        </div>
+                    </div>
                     <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
                 </div>
             </header>
@@ -669,6 +751,42 @@
                 setTimeout(() => toast.remove(), 300);
             }, 2500);
         }
+
+// ============================================================
+        // Notification & Message Dropdowns
+        // ============================================================
+        function toggleDropdown(id, el) {
+            document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                if (d.id !== id) d.classList.remove('show');
+            });
+            const dd = document.getElementById(id);
+            if (dd) dd.classList.toggle('show');
+        }
+
+        function clearNotifications() {
+            const items = document.querySelectorAll('#notifList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All notifications marked as read');
+        }
+
+        function clearMessages() {
+            const items = document.querySelectorAll('#msgList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('msgBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All messages marked as read');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                    d.classList.remove('show');
+                });
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', loadSettings);
     </script>

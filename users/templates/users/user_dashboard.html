@@ -38,7 +38,7 @@
                 <p class="nav-label">Account</p>
 <a href="#" class="nav-link" data-page="profile"><i class="fa-solid fa-user"></i> Profile</a>
                 <a href="#" class="nav-link" data-page="settings"><i class="fa-solid fa-gear"></i> Settings</a>
-                <a href="#"><i class="fa-solid fa-circle-question"></i> Help</a>
+                <a href="#" class="nav-link" data-page="help"><i class="fa-solid fa-circle-question"></i> Help</a>
             </nav>
 <div class="sidebar-footer">
                 <div class="user-mini">
@@ -64,8 +64,69 @@
                 <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
                 <h1 id="pageTitle">My Dashboard</h1>
                 <div class="topbar-right">
-                    <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">2</span></div>
-                    <div class="icon-btn"><i class="fa-solid fa-envelope"></i></div>
+                    <div class="icon-btn" onclick="toggleDropdown('notifDropdown', this)">
+                        <i class="fa-solid fa-bell"></i><span class="badge" id="notifBadge">2</span>
+                        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-bell"></i> Notifications</h4>
+                                <button class="notif-clear" onclick="clearNotifications()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="notifList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-box"></i></div>
+                                    <div class="notif-content">
+                                        <p>New product available: Check out the latest items!</p>
+                                        <small>5 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-tag"></i></div>
+                                    <div class="notif-content">
+                                        <p>Price drop on an item in your favorites</p>
+                                        <small>1 hour ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-star"></i></div>
+                                    <div class="notif-content">
+                                        <p>Weekly picks are now live</p>
+                                        <small>Yesterday</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); switchPage('explore');">Browse New Products</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-btn" onclick="toggleDropdown('msgDropdown', this)">
+                        <i class="fa-solid fa-envelope"></i>
+                        <div class="notif-dropdown" id="msgDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-envelope"></i> Messages</h4>
+                                <button class="notif-clear" onclick="clearMessages()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="msgList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-headset"></i></div>
+                                    <div class="notif-content">
+                                        <p>Waray Kita Support: Welcome to your account!</p>
+                                        <small>Just now</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-circle-info"></i></div>
+                                    <div class="notif-content">
+                                        <p>Tip: Use the Explore tab to discover new products</p>
+                                        <small>2 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); switchPage('help');">Get Help</a>
+                            </div>
+                        </div>
+                    </div>
                     <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
                 </div>
             </header>
@@ -468,7 +529,7 @@
                     <div class="welcome-banner">
                         <div>
                             <h2><i class="fa-solid fa-gear"></i> Settings</h2>
-                            <p>Manage your account preferences and security settings.</p>
+                            <p>Customize your dashboard appearance and preferences.</p>
                         </div>
                         <i class="fa-solid fa-gear banner-icon"></i>
                     </div>
@@ -488,7 +549,203 @@
                         {% endfor %}
                     {% endif %}
 
-<!-- Account Details -->
+                    <!-- Theme Customization -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-palette"></i> Theme Customization</h3>
+                            <button class="btn-sm" style="background:#eef2ff;color:var(--primary);border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;" onclick="resetTheme()">
+                                <i class="fa-solid fa-rotate"></i> Reset to Default
+                            </button>
+                        </div>
+                        <div class="two-col" style="grid-template-columns:1fr 1fr;">
+                            <div class="form-group">
+                                <label>Primary Color</label>
+                                <div style="display:flex;gap:10px;align-items:center;">
+                                    <input type="color" id="themePrimary" value="#7494ec" onchange="applyTheme()" style="width:50px;height:40px;border:1px solid #e0e0e0;border-radius:6px;padding:2px;cursor:pointer;">
+                                    <input type="text" id="themePrimaryText" value="#7494ec" onchange="document.getElementById('themePrimary').value=this.value;applyTheme();" style="flex:1;padding:10px;background:#f4f6fb;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;">
+                                </div>
+                                <p class="hint">Main accent color for buttons, banners, and highlights.</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Sidebar Color</label>
+                                <div style="display:flex;gap:10px;align-items:center;">
+                                    <input type="color" id="themeSidebar" value="#1e2a45" onchange="applyTheme()" style="width:50px;height:40px;border:1px solid #e0e0e0;border-radius:6px;padding:2px;cursor:pointer;">
+                                    <input type="text" id="themeSidebarText" value="#1e2a45" onchange="document.getElementById('themeSidebar').value=this.value;applyTheme();" style="flex:1;padding:10px;background:#f4f6fb;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;">
+                                </div>
+                                <p class="hint">Background color of the sidebar navigation.</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Success Color</label>
+                                <div style="display:flex;gap:10px;align-items:center;">
+                                    <input type="color" id="themeSuccess" value="#2ecc71" onchange="applyTheme()" style="width:50px;height:40px;border:1px solid #e0e0e0;border-radius:6px;padding:2px;cursor:pointer;">
+                                    <input type="text" id="themeSuccessText" value="#2ecc71" onchange="document.getElementById('themeSuccess').value=this.value;applyTheme();" style="flex:1;padding:10px;background:#f4f6fb;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;">
+                                </div>
+                                <p class="hint">Color for success badges, active indicators.</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Danger Color</label>
+                                <div style="display:flex;gap:10px;align-items:center;">
+                                    <input type="color" id="themeDanger" value="#e74c3c" onchange="applyTheme()" style="width:50px;height:40px;border:1px solid #e0e0e0;border-radius:6px;padding:2px;cursor:pointer;">
+                                    <input type="text" id="themeDangerText" value="#e74c3c" onchange="document.getElementById('themeDanger').value=this.value;applyTheme();" style="flex:1;padding:10px;background:#f4f6fb;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;">
+                                </div>
+                                <p class="hint">Color for delete buttons, danger badges.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theme Presets -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-swatchbook"></i> Quick Theme Presets</h3>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            <div class="preset-theme" onclick="applyPreset('default')" style="cursor:pointer;padding:14px 20px;border-radius:12px;border:2px solid #e0e0e0;display:flex;align-items:center;gap:12px;transition:0.2s;background:#fff;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e0e0e0'">
+                                <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7494ec,#5a7ad6);"></div>
+                                <div>
+                                    <strong style="font-size:14px;">Default</strong>
+                                    <p style="font-size:11px;color:var(--muted);margin:0;">Blue theme</p>
+                                </div>
+                            </div>
+                            <div class="preset-theme" onclick="applyPreset('dark')" style="cursor:pointer;padding:14px 20px;border-radius:12px;border:2px solid #e0e0e0;display:flex;align-items:center;gap:12px;transition:0.2s;background:#fff;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e0e0e0'">
+                                <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#2c3e50,#1a252f);"></div>
+                                <div>
+                                    <strong style="font-size:14px;">Dark Mode</strong>
+                                    <p style="font-size:11px;color:var(--muted);margin:0;">Dark sidebar, teal accent</p>
+                                </div>
+                            </div>
+                            <div class="preset-theme" onclick="applyPreset('nature')" style="cursor:pointer;padding:14px 20px;border-radius:12px;border:2px solid #e0e0e0;display:flex;align-items:center;gap:12px;transition:0.2s;background:#fff;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e0e0e0'">
+                                <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#2ecc71);"></div>
+                                <div>
+                                    <strong style="font-size:14px;">Nature</strong>
+                                    <p style="font-size:11px;color:var(--muted);margin:0;">Green accent, forest sidebar</p>
+                                </div>
+                            </div>
+                            <div class="preset-theme" onclick="applyPreset('sunset')" style="cursor:pointer;padding:14px 20px;border-radius:12px;border:2px solid #e0e0e0;display:flex;align-items:center;gap:12px;transition:0.2s;background:#fff;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e0e0e0'">
+                                <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#e67e22,#f39c12);"></div>
+                                <div>
+                                    <strong style="font-size:14px;">Sunset</strong>
+                                    <p style="font-size:11px;color:var(--muted);margin:0;">Orange accent, warm tones</p>
+                                </div>
+                            </div>
+                            <div class="preset-theme" onclick="applyPreset('ocean')" style="cursor:pointer;padding:14px 20px;border-radius:12px;border:2px solid #e0e0e0;display:flex;align-items:center;gap:12px;transition:0.2s;background:#fff;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e0e0e0'">
+                                <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#1abc9c,#16a085);"></div>
+                                <div>
+                                    <strong style="font-size:14px;">Ocean</strong>
+                                    <p style="font-size:11px;color:var(--muted);margin:0;">Teal accent, navy sidebar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+<!-- Layout Preferences -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-compress"></i> Layout Preferences</h3>
+                        </div>
+                        <div class="two-col" style="grid-template-columns:1fr 1fr;">
+                            <div class="form-group">
+                                <label>Sidebar Behavior</label>
+                                <div class="checkbox-group" style="margin-top:6px;">
+                                    <input type="checkbox" id="sidebarCollapsed" onchange="toggleSidebarPreference()">
+                                    <label for="sidebarCollapsed">Collapse sidebar by default</label>
+                                </div>
+                                <p class="hint">Sidebar will start collapsed until you click the menu icon.</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Display Density</label>
+                                <select id="displayDensity" onchange="applyDisplayDensity()" class="filter-select" style="width:100%;">
+                                    <option value="comfortable">Comfortable</option>
+                                    <option value="compact">Compact</option>
+                                </select>
+                                <p class="hint">"Compact" reduces padding for a denser layout.</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Product Card Layout</label>
+                                <select id="cardLayout" onchange="applyCardLayout()" class="filter-select" style="width:100%;">
+                                    <option value="grid">Grid View</option>
+                                    <option value="list">List View</option>
+                                </select>
+                                <p class="hint">Display products as cards in a grid or as a list.</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Animations</label>
+                                <div class="checkbox-group" style="margin-top:6px;">
+                                    <input type="checkbox" id="enableAnimations" onchange="toggleAnimations()" checked>
+                                    <label for="enableAnimations">Enable page animations</label>
+                                </div>
+                                <p class="hint">Disable for faster navigation on slower devices.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Preferences -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-bell"></i> Notification Preferences</h3>
+                        </div>
+                        <div class="two-col" style="grid-template-columns:1fr 1fr;">
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="notifEmail" onchange="saveNotifPrefs()" checked>
+                                    <label for="notifEmail">Email notifications</label>
+                                </div>
+                                <p class="hint">Receive updates via email about new products.</p>
+                            </div>
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="notifPush" onchange="saveNotifPrefs()">
+                                    <label for="notifPush">Push notifications</label>
+                                </div>
+                                <p class="hint">Receive browser push notifications.</p>
+                            </div>
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="notifPromo" onchange="saveNotifPrefs()" checked>
+                                    <label for="notifPromo">Promotional updates</label>
+                                </div>
+                                <p class="hint">Get notified about sales and promotions.</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Auto-refresh Interval</label>
+                                <select id="refreshInterval" onchange="applyRefreshInterval()" class="filter-select" style="width:100%;">
+                                    <option value="5000">5 seconds</option>
+                                    <option value="10000">10 seconds</option>
+                                    <option value="30000">30 seconds</option>
+                                    <option value="60000">1 minute</option>
+                                    <option value="0">Never (manual only)</option>
+                                </select>
+                                <p class="hint">How often to check for new products.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data & Privacy -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-shield"></i> Data & Privacy</h3>
+                        </div>
+                        <div class="two-col" style="grid-template-columns:1fr 1fr;">
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="showEmailPublic" onchange="savePrivacyPrefs()">
+                                    <label for="showEmailPublic">Show email on profile</label>
+                                </div>
+                                <p class="hint">Make your email visible to other users.</p>
+                            </div>
+                            <div class="form-group" style="display:flex;flex-direction:column;gap:8px;">
+                                <label>Local Data</label>
+                                <button class="btn-sm" style="background:#fdeaea;color:var(--danger);border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;width:fit-content;" onclick="clearLocalData()">
+                                    <i class="fa-solid fa-trash-can"></i> Clear All Local Data
+                                </button>
+                                <button class="btn-sm" style="background:#eef2ff;color:var(--primary);border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;width:fit-content;" onclick="exportFavorites()">
+                                    <i class="fa-solid fa-download"></i> Export Favorites
+                                </button>
+                                <p class="hint">Manage your locally stored preferences and data.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Details -->
                     <div class="panel">
                         <div class="panel-header">
                             <h3><i class="fa-solid fa-circle-info"></i> Account Details</h3>
@@ -507,6 +764,139 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ============================================================ -->
+                <!-- HELP PAGE -->
+                <!-- ============================================================ -->
+                <div class="page-content" id="page-help">
+                    <!-- Welcome Banner -->
+                    <div class="welcome-banner">
+                        <div>
+                            <h2><i class="fa-solid fa-circle-question"></i> Help & Support</h2>
+                            <p>Find answers to common questions or get in touch with our support team.</p>
+                        </div>
+                        <i class="fa-solid fa-headset banner-icon"></i>
+                    </div>
+
+                    <div class="two-col">
+                        <!-- Quick Contact Card -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3><i class="fa-solid fa-headset"></i> Contact Support</h3>
+                            </div>
+                            <div class="form-group">
+                                <label>Support Email</label>
+                                <p style="font-size:14px;color:var(--primary);font-weight:600;"><i class="fa-solid fa-envelope"></i> support@waraykita.com</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Support Hotline</label>
+                                <p style="font-size:14px;color:var(--primary);font-weight:600;"><i class="fa-solid fa-phone"></i> (053) 555-1234</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Office Hours</label>
+                                <p style="font-size:13px;color:var(--muted);">Monday – Friday, 8:00 AM – 5:00 PM (PHT)</p>
+                            </div>
+                            <div class="form-actions">
+                                <a href="mailto:support@waraykita.com" class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
+                                    <i class="fa-solid fa-paper-plane"></i> Send an Email
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Send a Message Form -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3><i class="fa-solid fa-comment-dots"></i> Send Us a Message</h3>
+                            </div>
+                            <form onsubmit="sendHelpMessage(event)">
+                                <div class="form-group">
+                                    <label>Subject</label>
+                                    <select id="helpSubject" class="filter-select" style="width:100%;">
+                                        <option value="General Inquiry">General Inquiry</option>
+                                        <option value="Account Issue">Account Issue</option>
+                                        <option value="Product Question">Product Question</option>
+                                        <option value="Technical Problem">Technical Problem</option>
+                                        <option value="Feedback">Feedback</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Message</label>
+                                    <textarea id="helpMessage" rows="5" style="width:100%;padding:12px;background:#f4f6fb;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;" placeholder="Describe your issue or question in detail..." required></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fa-solid fa-paper-plane"></i> Send Message
+                                    </button>
+                                </div>
+                                <p class="hint" id="helpFormStatus" style="margin-top:10px;"></p>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Section -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-circle-question"></i> Frequently Asked Questions</h3>
+                        </div>
+                        <div class="faq-list">
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <i class="fa-solid fa-chevron-down faq-icon"></i>
+                                    <span>How do I search for products?</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Go to the <strong>Explore</strong> tab in the sidebar. You can use the search box to search by name or description, filter by color or stock status, and sort results by newest, oldest, price, or name.</p>
+                                </div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <i class="fa-solid fa-chevron-down faq-icon"></i>
+                                    <span>How do I save products to my favorites?</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Click the <i class="fa-solid fa-heart"></i> heart icon on any product card. Your favorites are saved automatically in your browser and appear in the <strong>Favorites</strong> tab.</p>
+                                </div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <i class="fa-solid fa-chevron-down faq-icon"></i>
+                                    <span>How do I change my profile picture?</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Open the <strong>Profile</strong> tab, click on your avatar or "Click to change photo", select an image, then press <strong>Save Changes</strong>.</p>
+                                </div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <i class="fa-solid fa-chevron-down faq-icon"></i>
+                                    <span>How do I customize the theme of the dashboard?</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Open the <strong>Settings</strong> tab. You can change the primary, sidebar, success, and danger colors, or apply one of the quick theme presets. Your preferences are saved automatically and apply across the whole system.</p>
+                                </div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <i class="fa-solid fa-chevron-down faq-icon"></i>
+                                    <span>How do I change my password?</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Go to the <strong>Profile</strong> tab and use the "Change Password" form. Enter your current password, choose a new one (at least 8 characters), and confirm it.</p>
+                                </div>
+                            </div>
+                            <div class="faq-item" onclick="toggleFaq(this)">
+                                <div class="faq-question">
+                                    <i class="fa-solid fa-chevron-down faq-icon"></i>
+                                    <span>Where can I find the system requirements?</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Waray Kita works best in modern browsers like Chrome, Firefox, Edge, or Safari. An internet connection is required to load products and use real-time features.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -514,6 +904,59 @@
     <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // ============================================================
+        // Notification & Message Dropdowns
+        // ============================================================
+        function toggleDropdown(id, el) {
+            // Close all other dropdowns first
+            document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                if (d.id !== id) d.classList.remove('show');
+            });
+            const dd = document.getElementById(id);
+            if (dd) dd.classList.toggle('show');
+        }
+
+        function clearNotifications() {
+            const items = document.querySelectorAll('#notifList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All notifications marked as read');
+        }
+
+        function clearMessages() {
+            const items = document.querySelectorAll('#msgList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            showToast('All messages marked as read');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                    d.classList.remove('show');
+                });
+            }
+        });
+
+        // ============================================================
+        // Toast Notification
+        // ============================================================
+        function showToast(msg) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + msg;
+            toast.style.cssText = 'position:fixed;bottom:30px;right:30px;background:var(--success);color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:10px;animation:fadeInUp 0.3s ease-out;';
+            document.body.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 2500);
         }
 
         // ============================================================
@@ -525,7 +968,8 @@ const pageTitles = {
             explore: "Explore",
             favorites: "Favorites",
             profile: "My Profile",
-            settings: "Settings"
+            settings: "Settings",
+            help: "Help & Support"
         };
 
         function switchPage(pageName) {
@@ -844,6 +1288,304 @@ const pageTitles = {
                 reader.readAsDataURL(file);
             }
         }
+
+// ============================================================
+        // Theme Customization (Settings tab)
+        // ============================================================
+        function applyTheme() {
+            var primary = document.getElementById('themePrimary').value;
+            var sidebar = document.getElementById('themeSidebar').value;
+            var success = document.getElementById('themeSuccess').value;
+            var danger = document.getElementById('themeDanger').value;
+
+            // Update text inputs
+            document.getElementById('themePrimaryText').value = primary;
+            document.getElementById('themeSidebarText').value = sidebar;
+            document.getElementById('themeSuccessText').value = success;
+            document.getElementById('themeDangerText').value = danger;
+
+            // Save to localStorage
+            var theme = { primary: primary, sidebar: sidebar, success: success, danger: danger };
+            localStorage.setItem('waraykita_theme', JSON.stringify(theme));
+
+            // Apply globally via custom style tag
+            function darken(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.max((n>>16)-a,0),G=Math.max((n>>8&0x00FF)-a,0),B=Math.max((n&0x0000FF)-a,0); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+            function lighten(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.min((n>>16)+a,255),G=Math.min((n>>8&0x00FF)+a,255),B=Math.min((n&0x0000FF)+a,255); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+            var s = document.getElementById('custom-theme-styles');
+            if (s) s.textContent = ':root{--primary:'+primary+'!important;--primary-dark:'+darken(primary,15)+'!important;--sidebar:'+sidebar+'!important;--sidebar-hover:'+lighten(sidebar,15)+'!important;--success:'+success+'!important;--danger:'+danger+'!important;}.welcome-banner{background:linear-gradient(135deg,'+primary+','+darken(primary,15)+')!important;}.hero-banner{background:linear-gradient(135deg,'+primary+','+darken(primary,15)+')!important;}.btn-primary:hover{box-shadow:0 6px 15px '+primary+'4D!important;}';
+        }
+
+        var THEME_PRESETS = {
+            default: { primary: '#7494ec', sidebar: '#1e2a45', success: '#2ecc71', danger: '#e74c3c' },
+            dark: { primary: '#2c3e50', sidebar: '#1a252f', success: '#27ae60', danger: '#c0392b' },
+            nature: { primary: '#27ae60', sidebar: '#1a3a2a', success: '#2ecc71', danger: '#e74c3c' },
+            sunset: { primary: '#e67e22', sidebar: '#3a2a1a', success: '#27ae60', danger: '#c0392b' },
+            ocean: { primary: '#1abc9c', sidebar: '#0a2a2a', success: '#2ecc71', danger: '#e74c3c' }
+        };
+
+        function applyPreset(name) {
+            var preset = THEME_PRESETS[name];
+            if (!preset) return;
+            document.getElementById('themePrimary').value = preset.primary;
+            document.getElementById('themeSidebar').value = preset.sidebar;
+            document.getElementById('themeSuccess').value = preset.success;
+            document.getElementById('themeDanger').value = preset.danger;
+            applyTheme();
+        }
+
+        function resetTheme() {
+            applyPreset('default');
+        }
+
+        // ============================================================
+        // Sidebar collapse preference
+        // ============================================================
+        function toggleSidebarPreference() {
+            var collapsed = document.getElementById('sidebarCollapsed').checked;
+            localStorage.setItem('waraykita_sidebar_collapsed', collapsed);
+            if (collapsed) {
+                document.getElementById('sidebar').classList.remove('open');
+            } else {
+                document.getElementById('sidebar').classList.add('open');
+            }
+        }
+
+        // Load saved sidebar preference
+        (function() {
+            var collapsed = localStorage.getItem('waraykita_sidebar_collapsed') === 'true';
+            var cb = document.getElementById('sidebarCollapsed');
+            if (cb) cb.checked = collapsed;
+            if (collapsed) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        })();
+
+// ============================================================
+        // Layout & Display Preferences
+        // ============================================================
+        function applyDisplayDensity() {
+            var density = document.getElementById('displayDensity').value;
+            localStorage.setItem('waraykita_density', density);
+            // Apply via a class on the main content
+            document.querySelector('.content').classList.remove('density-comfortable', 'density-compact');
+            document.querySelector('.content').classList.add('density-' + density);
+        }
+
+        function applyCardLayout() {
+            var layout = document.getElementById('cardLayout').value;
+            localStorage.setItem('waraykita_card_layout', layout);
+            document.querySelectorAll('.products-grid').forEach(function(g) {
+                g.classList.remove('card-layout-grid', 'card-layout-list');
+                g.classList.add('card-layout-' + layout);
+            });
+        }
+
+        function toggleAnimations() {
+            var enabled = document.getElementById('enableAnimations').checked;
+            localStorage.setItem('waraykita_animations', enabled);
+            var sheets = document.styleSheets;
+            for (var i = 0; i < sheets.length; i++) {
+                try {
+                    if (sheets[i].ownerNode && sheets[i].ownerNode.id === 'custom-theme-styles') continue;
+                    if (sheets[i].cssRules) {
+                        for (var j = 0; j < sheets[i].cssRules.length; j++) {
+                            var rule = sheets[i].cssRules[j];
+                            if (rule.selectorText && rule.selectorText.includes('animation')) {
+                                rule.style.animationName = enabled ? '' : 'none';
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+            // Simple approach: add/remove a style block
+            var animStyle = document.getElementById('anim-toggle');
+            if (!animStyle) {
+                animStyle = document.createElement('style');
+                animStyle.id = 'anim-toggle';
+                document.head.appendChild(animStyle);
+            }
+            animStyle.textContent = enabled ? '' : '*, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }';
+        }
+
+        // ============================================================
+        // Notification Preferences
+        // ============================================================
+        function saveNotifPrefs() {
+            var prefs = {
+                email: document.getElementById('notifEmail').checked,
+                push: document.getElementById('notifPush').checked,
+                promo: document.getElementById('notifPromo').checked
+            };
+            localStorage.setItem('waraykita_notif_prefs', JSON.stringify(prefs));
+        }
+
+        function loadNotifPrefs() {
+            var saved = localStorage.getItem('waraykita_notif_prefs');
+            if (saved) {
+                try {
+                    var prefs = JSON.parse(saved);
+                    var cb1 = document.getElementById('notifEmail');
+                    var cb2 = document.getElementById('notifPush');
+                    var cb3 = document.getElementById('notifPromo');
+                    if (cb1) cb1.checked = prefs.email !== false;
+                    if (cb2) cb2.checked = prefs.push === true;
+                    if (cb3) cb3.checked = prefs.promo !== false;
+                } catch(e) {}
+            }
+        }
+
+        // ============================================================
+        // Auto-refresh Interval
+        // ============================================================
+        var refreshTimer = null;
+
+        function applyRefreshInterval() {
+            var val = parseInt(document.getElementById('refreshInterval').value);
+            localStorage.setItem('waraykita_refresh_interval', val);
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+            }
+            if (val > 0) {
+                refreshTimer = setInterval(fetchProducts, val);
+            }
+        }
+
+        function loadRefreshInterval() {
+            var saved = localStorage.getItem('waraykita_refresh_interval');
+            if (saved !== null) {
+                var sel = document.getElementById('refreshInterval');
+                if (sel) {
+                    sel.value = saved;
+                    applyRefreshInterval();
+                }
+            }
+        }
+
+        // ============================================================
+        // Privacy Preferences
+        // ============================================================
+        function savePrivacyPrefs() {
+            var prefs = {
+                showEmail: document.getElementById('showEmailPublic').checked
+            };
+            localStorage.setItem('waraykita_privacy_prefs', JSON.stringify(prefs));
+        }
+
+        function loadPrivacyPrefs() {
+            var saved = localStorage.getItem('waraykita_privacy_prefs');
+            if (saved) {
+                try {
+                    var prefs = JSON.parse(saved);
+                    var cb = document.getElementById('showEmailPublic');
+                    if (cb) cb.checked = prefs.showEmail === true;
+                } catch(e) {}
+            }
+        }
+
+        // ============================================================
+        // Data Management
+        // ============================================================
+        function clearLocalData() {
+            if (confirm('This will clear all your locally stored preferences, favorites, and theme settings. This cannot be undone. Continue?')) {
+                localStorage.removeItem('waraykita_theme');
+                localStorage.removeItem('waraykita_favorites');
+                localStorage.removeItem('waraykita_sidebar_collapsed');
+                localStorage.removeItem('waraykita_density');
+                localStorage.removeItem('waraykita_card_layout');
+                localStorage.removeItem('waraykita_animations');
+                localStorage.removeItem('waraykita_notif_prefs');
+                localStorage.removeItem('waraykita_refresh_interval');
+                localStorage.removeItem('waraykita_privacy_prefs');
+                location.reload();
+            }
+        }
+
+        function exportFavorites() {
+            var favs = JSON.parse(localStorage.getItem('waraykita_favorites') || '[]');
+            var data = { favorites: favs, exported_at: new Date().toISOString() };
+            var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'waraykita_favorites_export.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================================
+        // Help & Support (Help tab)
+        // ============================================================
+        function toggleFaq(el) {
+            var answer = el.querySelector('.faq-answer');
+            var icon = el.querySelector('.faq-icon');
+            if (el.classList.contains('active')) {
+                el.classList.remove('active');
+                answer.style.maxHeight = null;
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                // Close any other open FAQ
+                document.querySelectorAll('.faq-item.active').forEach(function(item) {
+                    item.classList.remove('active');
+                    item.querySelector('.faq-answer').style.maxHeight = null;
+                    item.querySelector('.faq-icon').classList.remove('fa-chevron-up');
+                    item.querySelector('.faq-icon').classList.add('fa-chevron-down');
+                });
+                el.classList.add('active');
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            }
+        }
+
+        function sendHelpMessage(e) {
+            e.preventDefault();
+            var subject = document.getElementById('helpSubject').value;
+            var message = document.getElementById('helpMessage').value;
+            var status = document.getElementById('helpFormStatus');
+
+            if (!message.trim()) {
+                status.innerHTML = '<span style="color:var(--danger);"><i class="fa-solid fa-circle-exclamation"></i> Please enter a message before sending.</span>';
+                return;
+            }
+
+            var subjectLine = encodeURIComponent('[Waray Kita] ' + subject);
+            var body = encodeURIComponent(message + '\n\nSent by: {{ user.username }}');
+            window.location.href = 'mailto:support@waraykita.com?subject=' + subjectLine + '&body=' + body;
+
+            status.innerHTML = '<span style="color:var(--success);"><i class="fa-solid fa-circle-check"></i> Your email client has been opened. Thank you for reaching out!</span>';
+            document.getElementById('helpMessage').value = '';
+        }
+
+        // ============================================================
+        // Load saved preferences on startup
+        // ============================================================
+        (function() {
+            // Density
+            var density = localStorage.getItem('waraykita_density');
+            var densitySel = document.getElementById('displayDensity');
+            if (density && densitySel) { densitySel.value = density; applyDisplayDensity(); }
+
+            // Card layout
+            var layout = localStorage.getItem('waraykita_card_layout');
+            var layoutSel = document.getElementById('cardLayout');
+            if (layout && layoutSel) { layoutSel.value = layout; applyCardLayout(); }
+
+            // Animations
+            var anims = localStorage.getItem('waraykita_animations');
+            var animCb = document.getElementById('enableAnimations');
+            if (anims !== null && animCb) { animCb.checked = anims === 'true'; toggleAnimations(); }
+
+            // Notifications
+            loadNotifPrefs();
+
+            // Refresh interval
+            loadRefreshInterval();
+
+            // Privacy
+            loadPrivacyPrefs();
+        })();
 
         // Initial load
         fetchProducts();
