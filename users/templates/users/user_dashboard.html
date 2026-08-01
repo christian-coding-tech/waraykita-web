@@ -6,7 +6,20 @@
     <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard | Waray Kita</title>
+<title>User Dashboard | Waray Kita</title>
+    <style id="custom-theme-styles"></style>
+    <script>
+        // Load saved theme from localStorage and apply globally
+        (function() {
+            var theme = JSON.parse(localStorage.getItem('waraykita_theme'));
+            if (theme) {
+                function darken(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.max((n>>16)-a,0),G=Math.max((n>>8&0x00FF)-a,0),B=Math.max((n&0x0000FF)-a,0); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                function lighten(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.min((n>>16)+a,255),G=Math.min((n>>8&0x00FF)+a,255),B=Math.min((n&0x0000FF)+a,255); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                var s = document.getElementById('custom-theme-styles');
+                if (s) s.textContent = ':root{--primary:'+theme.primary+'!important;--primary-dark:'+darken(theme.primary,15)+'!important;--sidebar:'+theme.sidebar+'!important;--sidebar-hover:'+lighten(theme.sidebar,15)+'!important;--success:'+theme.success+'!important;--danger:'+theme.danger+'!important;}.welcome-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.hero-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.btn-primary:hover{box-shadow:0 6px 15px '+theme.primary+'4D!important;}';
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="dashboard">
@@ -23,13 +36,19 @@
                 <a href="#" class="nav-link" data-page="explore"><i class="fa-solid fa-compass"></i> Explore</a>
                 <a href="#" class="nav-link" data-page="favorites"><i class="fa-solid fa-heart"></i> Favorites</a>
                 <p class="nav-label">Account</p>
-                <a href="#"><i class="fa-solid fa-user"></i> Profile</a>
-                <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+<a href="#" class="nav-link" data-page="profile"><i class="fa-solid fa-user"></i> Profile</a>
+                <a href="#" class="nav-link" data-page="settings"><i class="fa-solid fa-gear"></i> Settings</a>
                 <a href="#"><i class="fa-solid fa-circle-question"></i> Help</a>
             </nav>
-            <div class="sidebar-footer">
+<div class="sidebar-footer">
                 <div class="user-mini">
-                    <div class="avatar">{{ user.username|first|upper }}</div>
+                    <div class="avatar">
+                        {% if profile and profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                        {% else %}
+                            {{ user.username|first|upper }}
+                        {% endif %}
+                    </div>
                     <div class="info">
                         <p>{{ user.username }}</p>
                         <small>Member</small>
@@ -113,8 +132,14 @@
 
                     <!-- Profile Card -->
                     <div class="panel">
-                        <div class="profile-card">
-                            <div class="big-avatar">{{ user.username|first|upper }}</div>
+<div class="profile-card">
+                            <div class="big-avatar">
+                                {% if profile and profile.avatar %}
+                                    <img src="{{ profile.avatar.url }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                {% else %}
+                                    {{ user.username|first|upper }}
+                                {% endif %}
+                            </div>
                             <h3>{{ user.username }}</h3>
                             <span class="role-tag">Member</span>
                             <div class="profile-detail">
@@ -241,7 +266,7 @@
                     </div>
                 </div>
 
-                <!-- ============================================================ -->
+<!-- ============================================================ -->
                 <!-- FAVORITES PAGE -->
                 <!-- ============================================================ -->
                 <div class="page-content" id="page-favorites">
@@ -261,6 +286,227 @@
                         </div>
                     </div>
                 </div>
+
+<!-- ============================================================ -->
+                <!-- PROFILE PAGE -->
+                <!-- ============================================================ -->
+                <div class="page-content" id="page-profile">
+                    <!-- Welcome Banner -->
+                    <div class="welcome-banner">
+                        <div>
+                            <h2><i class="fa-solid fa-user"></i> My Profile</h2>
+                            <p>View and manage your personal information and account settings.</p>
+                        </div>
+                        <i class="fa-solid fa-user banner-icon"></i>
+                    </div>
+
+                    <!-- Alert Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if message.tags == 'success' %}
+                                <div class="dashboard-alert success">
+                                    <i class="fa-solid fa-circle-check"></i> {{ message }}
+                                </div>
+                            {% elif message.tags == 'error' %}
+                                <div class="dashboard-alert error">
+                                    <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="two-col">
+                        <!-- Profile Card -->
+                        <div class="panel">
+                            <div class="profile-card">
+                                <div class="big-avatar">
+                                    {% if profile and profile.avatar %}
+                                        <img src="{{ profile.avatar.url }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                    {% else %}
+                                        {{ user.username|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+                                <span class="role-tag">Member</span>
+                                <div class="profile-detail">
+                                    <span>Username</span>
+                                    <span>{{ user.username }}</span>
+                                </div>
+                                <div class="profile-detail">
+                                    <span>Email</span>
+                                    <span>{{ user.email|default:"Not set" }}</span>
+                                </div>
+                                <div class="profile-detail">
+                                    <span>Joined</span>
+                                    <span>{{ user.date_joined|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="profile-detail">
+                                    <span>Last Login</span>
+                                    <span>{{ user.last_login|date:"M d, Y H:i"|default:"First visit" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Activity -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3><i class="fa-solid fa-clock"></i> Recent Activity</h3>
+                            </div>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="act-icon green"><i class="fa-solid fa-right-to-bracket"></i></div>
+                                    <div class="act-info">
+                                        <p>Account logged in</p>
+                                        <small>{{ user.last_login|date:"M d, Y H:i"|default:"First visit" }}</small>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="act-icon blue"><i class="fa-solid fa-user-plus"></i></div>
+                                    <div class="act-info">
+                                        <p>Account created</p>
+                                        <small>{{ user.date_joined|date:"M d, Y" }}</small>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="act-icon orange"><i class="fa-solid fa-heart"></i></div>
+                                    <div class="act-info">
+                                        <p>Favorites updated</p>
+                                        <small><span id="profileFavCount">0</span> products saved</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+</div>
+
+                    <!-- Account Settings -->
+                    <div class="two-col">
+                        <!-- Profile Information Form -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3><i class="fa-solid fa-user-pen"></i> Profile Information</h3>
+                            </div>
+                            <form action="{% url 'user_dashboard' %}" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="settings_action" value="profile">
+<div class="form-group" style="text-align:center;">
+                                <label>Profile Picture</label>
+                                <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:10px;">
+                                    <div class="big-avatar" style="width:100px;height:100px;font-size:40px;cursor:pointer;" onclick="document.getElementById('avatarInput').click();">
+                                        {% if profile and profile.avatar %}
+                                            <img src="{{ profile.avatar.url }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                        {% else %}
+                                            {{ user.username|first|upper }}
+                                        {% endif %}
+                                    </div>
+                                    <span style="font-size:12px;color:var(--primary);cursor:pointer;" onclick="document.getElementById('avatarInput').click();">
+                                        <i class="fa-solid fa-camera"></i> Click to change photo
+                                    </span>
+                                    <input type="file" name="avatar" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar(event)">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                    <label>Username</label>
+                                    <input type="text" value="{{ user.username }}" disabled>
+                                    <p class="hint">Username cannot be changed.</p>
+                                </div>
+                                <div class="form-group">
+                                    <label>First Name</label>
+                                    <input type="text" name="first_name" value="{{ user.first_name }}" placeholder="Enter first name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Last Name</label>
+                                    <input type="text" name="last_name" value="{{ user.last_name }}" placeholder="Enter last name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" name="email" value="{{ user.email }}" placeholder="Enter email">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Password Change Form -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3><i class="fa-solid fa-key"></i> Change Password</h3>
+                            </div>
+                            <form action="{% url 'user_dashboard' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="settings_action" value="password">
+                                <div class="form-group">
+                                    <label>Current Password</label>
+                                    <input type="password" name="current_password" placeholder="Enter current password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>New Password</label>
+                                    <input type="password" name="new_password" placeholder="Enter new password" required>
+                                    <p class="hint">Must be at least 8 characters long.</p>
+                                </div>
+                                <div class="form-group">
+                                    <label>Confirm New Password</label>
+                                    <input type="password" name="confirm_password" placeholder="Re-enter new password" required>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fa-solid fa-key"></i> Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+</div>
+
+<!-- ============================================================ -->
+                <!-- SETTINGS PAGE -->
+                <!-- ============================================================ -->
+                <div class="page-content" id="page-settings">
+                    <!-- Welcome Banner -->
+                    <div class="welcome-banner">
+                        <div>
+                            <h2><i class="fa-solid fa-gear"></i> Settings</h2>
+                            <p>Manage your account preferences and security settings.</p>
+                        </div>
+                        <i class="fa-solid fa-gear banner-icon"></i>
+                    </div>
+
+                    <!-- Alert Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if message.tags == 'success' %}
+                                <div class="dashboard-alert success">
+                                    <i class="fa-solid fa-circle-check"></i> {{ message }}
+                                </div>
+                            {% elif message.tags == 'error' %}
+                                <div class="dashboard-alert error">
+                                    <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+<!-- Account Details -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-circle-info"></i> Account Details</h3>
+                        </div>
+                        <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                            <span style="color:var(--muted);">Role</span>
+                            <span><span class="status-badge active">Member</span></span>
+                        </div>
+                        <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                            <span style="color:var(--muted);">Date Joined</span>
+                            <span>{{ user.date_joined|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                            <span style="color:var(--muted);">Last Login</span>
+                            <span>{{ user.last_login|date:"M d, Y H:i"|default:"First visit" }}</span>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -273,11 +519,13 @@
         // ============================================================
         // Page Navigation (SPA-style tab switching)
         // ============================================================
-        const pageTitles = {
+const pageTitles = {
             dashboard: "My Dashboard",
             home: "Home",
             explore: "Explore",
-            favorites: "Favorites"
+            favorites: "Favorites",
+            profile: "My Profile",
+            settings: "Settings"
         };
 
         function switchPage(pageName) {
@@ -577,6 +825,23 @@
                 renderAllGrids();
             } catch (err) {
                 console.error('Failed to fetch products:', err);
+            }
+        }
+
+// ============================================================
+        // Avatar preview
+        // ============================================================
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = document.querySelector('#page-profile .big-avatar');
+                    if (previewDiv) {
+                        previewDiv.innerHTML = '<img src="' + e.target.result + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+                    }
+                };
+                reader.readAsDataURL(file);
             }
         }
 

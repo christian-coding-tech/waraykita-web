@@ -1203,4 +1203,73 @@ table tr:hover td {
 .sidebar-header .logo { overflow: hidden; flex-shrink: 0; }  
 .sidebar-header .logo img { width: 100%; height: 100%; object-fit: cover; }  
 .banner-logo { width: 80px; height: 80px; object-fit: contain; opacity: 0.3; animation: floatIcon 3s ease-in-out infinite; }  
-.hero-logo { width: 100px; height: 100px; object-fit: contain; opacity: 0.3; animation: floatIcon 3s ease-in-out infinite; } 
+.hero-logo { width: 100px; height: 100px; object-fit: contain; opacity: 0.3; animation: floatIcon 3s ease-in-out infinite; }
+
+/* ============================================================ */
+/* Avatar Upload (Settings pages) */
+/* ============================================================ */
+.avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--primary);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 36px;
+    font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(116, 148, 236, 0.3);
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.avatar-preview-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-upload-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.avatar-upload-input .btn-secondary {
+    padding: 10px 18px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.avatar-upload-input .btn-secondary:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+/* Sidebar avatar with image */
+.sidebar-footer .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}

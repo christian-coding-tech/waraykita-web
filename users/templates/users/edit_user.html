@@ -6,7 +6,20 @@
     <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit User | Waray Kita</title>
+<title>Edit User | Waray Kita</title>
+    <style id="custom-theme-styles"></style>
+    <script>
+        // Load saved theme from localStorage and apply globally
+        (function() {
+            var theme = JSON.parse(localStorage.getItem('waraykita_theme'));
+            if (theme) {
+                function darken(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.max((n>>16)-a,0),G=Math.max((n>>8&0x00FF)-a,0),B=Math.max((n&0x0000FF)-a,0); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                function lighten(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.min((n>>16)+a,255),G=Math.min((n>>8&0x00FF)+a,255),B=Math.min((n&0x0000FF)+a,255); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                var s = document.getElementById('custom-theme-styles');
+                if (s) s.textContent = ':root{--primary:'+theme.primary+'!important;--primary-dark:'+darken(theme.primary,15)+'!important;--sidebar:'+theme.sidebar+'!important;--sidebar-hover:'+lighten(theme.sidebar,15)+'!important;--success:'+theme.success+'!important;--danger:'+theme.danger+'!important;}.welcome-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.hero-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.btn-primary:hover{box-shadow:0 6px 15px '+theme.primary+'4D!important;}';
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="dashboard">

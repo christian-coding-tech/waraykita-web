@@ -18,6 +18,9 @@ urlpatterns = [
     path("add-item/", views.add_item_view, name="add_item"),
     path("toggle-item/<int:item_id>/", views.toggle_item_status_view, name="toggle_item"),
     path("delete-item/<int:item_id>/", views.delete_item_view, name="delete_item"),
+    # Settings (Admin & User)
+    path("admin-settings/", views.admin_settings_view, name="admin_settings"),
+    path("user-settings/", views.user_settings_view, name="user_settings"),
     # Public product API (for real-time updates)
     path("api/active-items/", views.api_active_items_view, name="api_active_items"),
 ]

@@ -1,0 +1,532 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings | Waray Kita</title>
+    <style id="custom-theme-styles"></style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
+                <h2>Waray<span>Kita</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <p class="nav-label">Main</p>
+                <a href="{% url 'user_dashboard' %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+                <a href="#"><i class="fa-solid fa-compass"></i> Explore</a>
+                <a href="#"><i class="fa-solid fa-heart"></i> Favorites</a>
+                <p class="nav-label">Account</p>
+                <a href="#"><i class="fa-solid fa-user"></i> Profile</a>
+                <a href="{% url 'user_settings' %}" class="active"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="#"><i class="fa-solid fa-circle-question"></i> Help</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <div class="avatar">{{ user.username|first|upper }}</div>
+                    <div class="info">
+                        <p>{{ user.username }}</p>
+                        <small>Member</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Topbar -->
+            <header class="topbar">
+                <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                <h1>System Settings</h1>
+                <div class="topbar-right">
+                    <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">2</span></div>
+                    <div class="icon-btn"><i class="fa-solid fa-envelope"></i></div>
+                    <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="content">
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div class="dashboard-alert success">
+                                <i class="fa-solid fa-circle-check"></i> {{ message }}
+                            </div>
+                        {% elif message.tags == 'error' %}
+                            <div class="dashboard-alert error">
+                                <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <div class="page-header">
+                    <h2><i class="fa-solid fa-palette"></i> Display & Showcase Settings</h2>
+                    <button class="btn-secondary" onclick="resetToDefaults()">
+                        <i class="fa-solid fa-rotate-left"></i> Reset to Defaults
+                    </button>
+                </div>
+
+                <!-- Color Customization -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-paintbrush"></i> Color Theme</h3>
+                        <span class="status-badge active" id="themeStatus">Default</span>
+                    </div>
+                    <div class="two-col" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>Primary Color</label>
+                            <div class="color-picker-row">
+                                <input type="color" id="primaryColor" class="color-input" value="#7494ec" onchange="applyColorTheme()">
+                                <input type="text" id="primaryColorHex" class="color-hex-input" value="#7494ec" oninput="syncColorInput(this, 'primaryColor')">
+                            </div>
+                            <p class="hint">Main accent color used for buttons, links, and highlights.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Sidebar Background</label>
+                            <div class="color-picker-row">
+                                <input type="color" id="sidebarColor" class="color-input" value="#1e2a45" onchange="applyColorTheme()">
+                                <input type="text" id="sidebarColorHex" class="color-hex-input" value="#1e2a45" oninput="syncColorInput(this, 'sidebarColor')">
+                            </div>
+                            <p class="hint">Background color of the navigation sidebar.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Success Color</label>
+                            <div class="color-picker-row">
+                                <input type="color" id="successColor" class="color-input" value="#2ecc71" onchange="applyColorTheme()">
+                                <input type="text" id="successColorHex" class="color-hex-input" value="#2ecc71" oninput="syncColorInput(this, 'successColor')">
+                            </div>
+                            <p class="hint">Used for active status badges and positive indicators.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Danger Color</label>
+                            <div class="color-picker-row">
+                                <input type="color" id="dangerColor" class="color-input" value="#e74c3c" onchange="applyColorTheme()">
+                                <input type="text" id="dangerColorHex" class="color-hex-input" value="#e74c3c" oninput="syncColorInput(this, 'dangerColor')">
+                            </div>
+                            <p class="hint">Used for delete buttons, inactive badges, and warnings.</p>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="applyColorTheme(); saveTheme();">
+                            <i class="fa-solid fa-check"></i> Apply Theme
+                        </button>
+                        <button class="btn-secondary" onclick="resetColorTheme()">
+                            <i class="fa-solid fa-undo"></i> Reset Colors
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product Showcase Settings -->
+                <div class="two-col">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-grip"></i> Product Grid Layout</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Grid Columns</label>
+                            <select id="gridColumns" onchange="saveShowcaseSettings()" class="filter-select" style="width:100%;">
+                                <option value="auto-fill, 240px">Auto (Responsive)</option>
+                                <option value="3">3 Columns</option>
+                                <option value="4">4 Columns</option>
+                                <option value="5">5 Columns</option>
+                                <option value="6">6 Columns</option>
+                            </select>
+                            <p class="hint">Number of product cards per row in the grid.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Items Per Page (Dashboard)</label>
+                            <select id="itemsPerPage" onchange="saveShowcaseSettings()" class="filter-select" style="width:100%;">
+                                <option value="4">4 Items</option>
+                                <option value="8">8 Items</option>
+                                <option value="12">12 Items</option>
+                                <option value="16">16 Items</option>
+                            </select>
+                            <p class="hint">Number of products shown on the dashboard page.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Sort Order</label>
+                            <select id="defaultSort" onchange="saveShowcaseSettings()" class="filter-select" style="width:100%;">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="name">Name A-Z</option>
+                            </select>
+                            <p class="hint">Default sorting applied to product listings.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-sliders"></i> Card & Animation Settings</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Product Card Style</label>
+                            <select id="cardStyle" onchange="saveShowcaseSettings()" class="filter-select" style="width:100%;">
+                                <option value="default">Default (With Shadow)</option>
+                                <option value="bordered">Bordered</option>
+                                <option value="minimal">Minimal (No Border)</option>
+                                <option value="rounded">Rounded Corners</option>
+                            </select>
+                            <p class="hint">Visual style of product cards in the grid.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Card Animations</label>
+                            <select id="cardAnimations" onchange="saveShowcaseSettings()" class="filter-select" style="width:100%;">
+                                <option value="enabled">Enabled (Animated)</option>
+                                <option value="disabled">Disabled (Static)</option>
+                            </select>
+                            <p class="hint">Toggle entrance animations for product cards.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Price Display Format</label>
+                            <select id="priceFormat" onchange="saveShowcaseSettings()" class="filter-select" style="width:100%;">
+                                <option value="php">₱ PHP (Philippine Peso)</option>
+                                <option value="usd">$ USD (US Dollar)</option>
+                                <option value="eur">€ EUR (Euro)</option>
+                            </select>
+                            <p class="hint">Currency symbol used for product prices.</p>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="showStockBadge" onchange="saveShowcaseSettings()" checked>
+                                <label for="showStockBadge">Show stock status badges on cards</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="showColorVariant" onchange="saveShowcaseSettings()" checked>
+                                <label for="showColorVariant">Show color variant labels on cards</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-eye"></i> Live Preview</h3>
+                        <span class="status-badge active">Preview</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));gap:16px;" id="settingsPreview">
+                        <div class="product-card">
+                            <div class="product-img-wrap">
+                                <div class="product-img-placeholder"><i class="fa-solid fa-image"></i></div>
+                            </div>
+                            <div class="product-body">
+                                <h4 class="product-title">Sample Product</h4>
+                                <p class="product-price">₱1,299.00</p>
+                                <p class="product-desc">A preview of how your products will appear.</p>
+                                <div class="product-meta">
+                                    <span class="product-color"><i class="fa-solid fa-palette"></i> Blue</span>
+                                    <span class="status-badge active">In Stock (10)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-card">
+                            <div class="product-img-wrap">
+                                <div class="product-img-placeholder"><i class="fa-solid fa-image"></i></div>
+                            </div>
+                            <div class="product-body">
+                                <h4 class="product-title">Another Product</h4>
+                                <p class="product-price">₱799.00</p>
+                                <p class="product-desc">Settings will apply to all products.</p>
+                                <div class="product-meta">
+                                    <span class="product-color"><i class="fa-solid fa-palette"></i> Red</span>
+                                    <span class="status-badge inactive">Out of Stock</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-circle-info"></i> System Information</h3>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:16px;">
+                        <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                            <span style="color:var(--muted);">Theme</span>
+                            <span id="systemThemeDisplay">Custom</span>
+                        </div>
+                        <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                            <span style="color:var(--muted);">Grid Layout</span>
+                            <span id="systemGridDisplay">Auto (Responsive)</span>
+                        </div>
+                        <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                            <span style="color:var(--muted);">Card Style</span>
+                            <span id="systemCardDisplay">Default</span>
+                        </div>
+                        <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                            <span style="color:var(--muted);">Animations</span>
+                            <span id="systemAnimDisplay">Enabled</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <style>
+        .color-picker-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .color-input {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 2px;
+            background: none;
+        }
+        .color-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-input::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+        .color-hex-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #f4f6fb;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            font-family: monospace;
+            transition: 0.2s;
+        }
+        .color-hex-input:focus {
+            border-color: var(--primary);
+            background: #fff;
+        }
+    </style>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Color Theme — applies globally to the whole system via :root
+        function applyColorTheme() {
+            const primary = document.getElementById('primaryColor').value;
+            const sidebar = document.getElementById('sidebarColor').value;
+            const success = document.getElementById('successColor').value;
+            const danger = document.getElementById('dangerColor').value;
+            const primaryDark = darkenColor(primary, 15);
+            const style = document.getElementById('custom-theme-styles');
+            style.textContent = `
+                :root {
+                    --primary: ${primary} !important;
+                    --primary-dark: ${primaryDark} !important;
+                    --sidebar: ${sidebar} !important;
+                    --sidebar-hover: ${lightenColor(sidebar, 15)} !important;
+                    --success: ${success} !important;
+                    --danger: ${danger} !important;
+                }
+                .welcome-banner { background: linear-gradient(135deg, ${primary}, ${primaryDark}) !important; }
+                .hero-banner { background: linear-gradient(135deg, ${primary}, ${primaryDark}) !important; }
+                .btn-primary:hover { box-shadow: 0 6px 15px ${primary}4D !important; }
+            `;
+            document.getElementById('themeStatus').textContent = 'Custom';
+            updateSystemInfo();
+        }
+
+        function darkenColor(hex, percent) {
+            const num = parseInt(hex.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = Math.max((num >> 16) - amt, 0);
+            const G = Math.max((num >> 8 & 0x00FF) - amt, 0);
+            const B = Math.max((num & 0x0000FF) - amt, 0);
+            return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+        }
+
+        function lightenColor(hex, percent) {
+            const num = parseInt(hex.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = Math.min((num >> 16) + amt, 255);
+            const G = Math.min((num >> 8 & 0x00FF) + amt, 255);
+            const B = Math.min((num & 0x0000FF) + amt, 255);
+            return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+        }
+
+        function syncColorInput(textInput, colorId) {
+            let val = textInput.value.trim();
+            if (val.startsWith('#')) {
+                document.getElementById(colorId).value = val;
+                applyColorTheme();
+            }
+        }
+
+        function resetColorTheme() {
+            document.getElementById('primaryColor').value = '#7494ec';
+            document.getElementById('primaryColorHex').value = '#7494ec';
+            document.getElementById('sidebarColor').value = '#1e2a45';
+            document.getElementById('sidebarColorHex').value = '#1e2a45';
+            document.getElementById('successColor').value = '#2ecc71';
+            document.getElementById('successColorHex').value = '#2ecc71';
+            document.getElementById('dangerColor').value = '#e74c3c';
+            document.getElementById('dangerColorHex').value = '#e74c3c';
+            applyColorTheme();
+            document.getElementById('themeStatus').textContent = 'Default';
+            localStorage.removeItem('waraykita_theme');
+            updateSystemInfo();
+        }
+
+        function saveTheme() {
+            const theme = {
+                primary: document.getElementById('primaryColor').value,
+                sidebar: document.getElementById('sidebarColor').value,
+                success: document.getElementById('successColor').value,
+                danger: document.getElementById('dangerColor').value,
+            };
+            localStorage.setItem('waraykita_theme', JSON.stringify(theme));
+            showToast('Theme saved successfully!');
+        }
+
+        function saveShowcaseSettings() {
+            const settings = {
+                gridColumns: document.getElementById('gridColumns').value,
+                itemsPerPage: document.getElementById('itemsPerPage').value,
+                defaultSort: document.getElementById('defaultSort').value,
+                cardStyle: document.getElementById('cardStyle').value,
+                cardAnimations: document.getElementById('cardAnimations').value,
+                priceFormat: document.getElementById('priceFormat').value,
+                showStockBadge: document.getElementById('showStockBadge').checked,
+                showColorVariant: document.getElementById('showColorVariant').checked,
+            };
+            localStorage.setItem('waraykita_showcase', JSON.stringify(settings));
+            applyShowcasePreview();
+            updateSystemInfo();
+            showToast('Showcase settings saved!');
+        }
+
+        function loadSettings() {
+            const theme = JSON.parse(localStorage.getItem('waraykita_theme'));
+            if (theme) {
+                if (theme.primary) {
+                    document.getElementById('primaryColor').value = theme.primary;
+                    document.getElementById('primaryColorHex').value = theme.primary;
+                }
+                if (theme.sidebar) {
+                    document.getElementById('sidebarColor').value = theme.sidebar;
+                    document.getElementById('sidebarColorHex').value = theme.sidebar;
+                }
+                if (theme.success) {
+                    document.getElementById('successColor').value = theme.success;
+                    document.getElementById('successColorHex').value = theme.success;
+                }
+                if (theme.danger) {
+                    document.getElementById('dangerColor').value = theme.danger;
+                    document.getElementById('dangerColorHex').value = theme.danger;
+                }
+                applyColorTheme();
+                document.getElementById('themeStatus').textContent = 'Custom';
+            }
+            const showcase = JSON.parse(localStorage.getItem('waraykita_showcase'));
+            if (showcase) {
+                if (showcase.gridColumns) document.getElementById('gridColumns').value = showcase.gridColumns;
+                if (showcase.itemsPerPage) document.getElementById('itemsPerPage').value = showcase.itemsPerPage;
+                if (showcase.defaultSort) document.getElementById('defaultSort').value = showcase.defaultSort;
+                if (showcase.cardStyle) document.getElementById('cardStyle').value = showcase.cardStyle;
+                if (showcase.cardAnimations) document.getElementById('cardAnimations').value = showcase.cardAnimations;
+                if (showcase.priceFormat) document.getElementById('priceFormat').value = showcase.priceFormat;
+                if (showcase.showStockBadge !== undefined) document.getElementById('showStockBadge').checked = showcase.showStockBadge;
+                if (showcase.showColorVariant !== undefined) document.getElementById('showColorVariant').checked = showcase.showColorVariant;
+                applyShowcasePreview();
+            }
+            updateSystemInfo();
+        }
+
+        function applyShowcasePreview() {
+            const gridColumns = document.getElementById('gridColumns').value;
+            const cardStyle = document.getElementById('cardStyle').value;
+            const animations = document.getElementById('cardAnimations').value;
+            const showStock = document.getElementById('showStockBadge').checked;
+            const showColor = document.getElementById('showColorVariant').checked;
+            const preview = document.getElementById('settingsPreview');
+            if (gridColumns === 'auto-fill, 240px') {
+                preview.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+            } else {
+                preview.style.gridTemplateColumns = 'repeat(' + parseInt(gridColumns) + ', 1fr)';
+            }
+            const cards = preview.querySelectorAll('.product-card');
+            cards.forEach(function(card) {
+                card.style.border = '';
+                card.style.boxShadow = '';
+                card.style.borderRadius = '12px';
+                switch (cardStyle) {
+                    case 'bordered': card.style.border = '2px solid var(--primary)'; card.style.boxShadow = 'none'; break;
+                    case 'minimal': card.style.border = 'none'; card.style.boxShadow = 'none'; break;
+                    case 'rounded': card.style.borderRadius = '20px'; break;
+                    default: card.style.border = '1px solid #eee'; card.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
+                }
+            });
+            if (animations === 'disabled') {
+                cards.forEach(function(card) { card.style.animation = 'none'; });
+            } else {
+                cards.forEach(function(card) { card.style.animation = ''; });
+            }
+            if (!showStock) {
+                document.querySelectorAll('#settingsPreview .status-badge').forEach(function(b) { b.style.display = 'none'; });
+            } else {
+                document.querySelectorAll('#settingsPreview .status-badge').forEach(function(b) { b.style.display = ''; });
+            }
+            if (!showColor) {
+                document.querySelectorAll('#settingsPreview .product-color').forEach(function(c) { c.style.display = 'none'; });
+            } else {
+                document.querySelectorAll('#settingsPreview .product-color').forEach(function(c) { c.style.display = ''; });
+            }
+        }
+
+        function updateSystemInfo() {
+            const gridSelect = document.getElementById('gridColumns');
+            const gridText = gridSelect.options[gridSelect.selectedIndex] ? gridSelect.options[gridSelect.selectedIndex].text : 'Auto';
+            document.getElementById('systemThemeDisplay').textContent = document.getElementById('themeStatus').textContent;
+            document.getElementById('systemGridDisplay').textContent = gridText;
+            var cardStyleSelect = document.getElementById('cardStyle');
+            document.getElementById('systemCardDisplay').textContent = cardStyleSelect.options[cardStyleSelect.selectedIndex] ? cardStyleSelect.options[cardStyleSelect.selectedIndex].text : 'Default';
+            document.getElementById('systemAnimDisplay').textContent = document.getElementById('cardAnimations').value === 'enabled' ? 'Enabled' : 'Disabled';
+        }
+
+        function resetToDefaults() {
+            if (!confirm('Reset all settings to their default values?')) return;
+            localStorage.removeItem('waraykita_theme');
+            localStorage.removeItem('waraykita_showcase');
+            location.reload();
+        }
+
+        function showToast(msg) {
+            var existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+            var toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + msg;
+            toast.style.cssText = 'position:fixed;bottom:30px;right:30px;background:var(--success);color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:10px;animation:fadeInUp 0.3s ease-out;';
+            document.body.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 2500);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+</body>
+</html>

@@ -5,12 +5,19 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
-from .models import Item
+from .models import Item, Profile
+
+
+def get_user_profile(user):
+    """Get or create the Profile for a given user."""
+    profile, created = Profile.objects.get_or_create(user=user)
+    return profile
 
 
 def is_admin(user):
     """Check if the user is an admin (staff or superuser)."""
     return user.is_authenticated and (user.is_superuser or user.is_staff)
+
 
 # Create your views here.
 def login_view(request):
@@ -119,6 +126,7 @@ def admin_dashboard_view(request):
 
     context = {
         "user": request.user,
+        "profile": get_user_profile(request.user),
         "total_users": total_users,
         "total_items": total_items,
         "activity_rate": activity_rate,
@@ -134,7 +142,56 @@ def user_dashboard_view(request):
     if request.user.is_superuser or request.user.is_staff:
         return redirect("admin_dashboard")
 
-    return render(request, "users/user_dashboard.html", {"user": request.user})
+    if request.method == "POST":
+        settings_action = request.POST.get("settings_action")
+
+        if settings_action == "profile":
+            first_name = request.POST.get("first_name", "").strip()
+            last_name = request.POST.get("last_name", "").strip()
+            email = request.POST.get("email", "").strip()
+            avatar = request.FILES.get("avatar")
+
+            if email and email != request.user.email:
+                if User.objects.filter(email=email).exclude(id=request.user.id).exists():
+                    messages.error(request, "Email is already in use by another account.")
+                else:
+                    request.user.email = email
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+            request.user.save()
+
+            if avatar:
+                profile = get_user_profile(request.user)
+                if profile.avatar:
+                    try:
+                        profile.avatar.delete(save=False)
+                    except Exception:
+                        pass
+                profile.avatar = avatar
+                profile.save()
+
+            messages.success(request, "Profile updated successfully.")
+            return redirect("user_dashboard")
+
+        elif settings_action == "password":
+            current_password = request.POST.get("current_password", "")
+            new_password = request.POST.get("new_password", "")
+            confirm_password = request.POST.get("confirm_password", "")
+
+            if not request.user.check_password(current_password):
+                messages.error(request, "Current password is incorrect.")
+            elif new_password != confirm_password:
+                messages.error(request, "New passwords do not match.")
+            elif len(new_password) < 8:
+                messages.error(request, "Password must be at least 8 characters long.")
+            else:
+                request.user.set_password(new_password)
+                request.user.save()
+                messages.success(request, "Password changed successfully. Please log in again.")
+                return redirect("login")
+
+    profile = get_user_profile(request.user)
+    return render(request, "users/user_dashboard.html", {"user": request.user, "profile": profile})
 
 
 # ============================================================
@@ -323,6 +380,128 @@ def delete_item_view(request, item_id):
     item.delete()
     messages.success(request, f"Product '{title}' deleted successfully.")
     return redirect("manage_items")
+
+
+# ============================================================
+# Settings (Admin & User)
+# ============================================================
+
+@login_required(login_url="login")
+def admin_settings_view(request):
+    """Admin settings page — profile + password change."""
+    if not (request.user.is_superuser or request.user.is_staff):
+        return redirect("user_dashboard")
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "profile":
+            first_name = request.POST.get("first_name", "").strip()
+            last_name = request.POST.get("last_name", "").strip()
+            email = request.POST.get("email", "").strip()
+            avatar = request.FILES.get("avatar")
+
+            if email and email != request.user.email:
+                if User.objects.filter(email=email).exclude(id=request.user.id).exists():
+                    messages.error(request, "Email is already in use by another account.")
+                else:
+                    request.user.email = email
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+            request.user.save()
+
+            # Handle avatar upload
+            if avatar:
+                profile = get_user_profile(request.user)
+                if profile.avatar:
+                    try:
+                        profile.avatar.delete(save=False)
+                    except Exception:
+                        pass
+                profile.avatar = avatar
+                profile.save()
+
+            messages.success(request, "Profile updated successfully.")
+            return redirect("admin_settings")
+
+        elif action == "password":
+            current_password = request.POST.get("current_password", "")
+            new_password = request.POST.get("new_password", "")
+            confirm_password = request.POST.get("confirm_password", "")
+
+            if not request.user.check_password(current_password):
+                messages.error(request, "Current password is incorrect.")
+            elif new_password != confirm_password:
+                messages.error(request, "New passwords do not match.")
+            elif len(new_password) < 8:
+                messages.error(request, "Password must be at least 8 characters long.")
+            else:
+                request.user.set_password(new_password)
+                request.user.save()
+                messages.success(request, "Password changed successfully. Please log in again.")
+                return redirect("login")
+
+    profile = get_user_profile(request.user)
+    return render(request, "users/admin_settings.html", {"user": request.user, "profile": profile})
+
+
+@login_required(login_url="login")
+def user_settings_view(request):
+    """User settings page — profile + password change."""
+    if request.user.is_superuser or request.user.is_staff:
+        return redirect("admin_dashboard")
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "profile":
+            first_name = request.POST.get("first_name", "").strip()
+            last_name = request.POST.get("last_name", "").strip()
+            email = request.POST.get("email", "").strip()
+            avatar = request.FILES.get("avatar")
+
+            if email and email != request.user.email:
+                if User.objects.filter(email=email).exclude(id=request.user.id).exists():
+                    messages.error(request, "Email is already in use by another account.")
+                else:
+                    request.user.email = email
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+            request.user.save()
+
+            # Handle avatar upload
+            if avatar:
+                profile = get_user_profile(request.user)
+                if profile.avatar:
+                    try:
+                        profile.avatar.delete(save=False)
+                    except Exception:
+                        pass
+                profile.avatar = avatar
+                profile.save()
+
+            messages.success(request, "Profile updated successfully.")
+            return redirect("user_settings")
+
+        elif action == "password":
+            current_password = request.POST.get("current_password", "")
+            new_password = request.POST.get("new_password", "")
+            confirm_password = request.POST.get("confirm_password", "")
+
+            if not request.user.check_password(current_password):
+                messages.error(request, "Current password is incorrect.")
+            elif new_password != confirm_password:
+                messages.error(request, "New passwords do not match.")
+            elif len(new_password) < 8:
+                messages.error(request, "Password must be at least 8 characters long.")
+            else:
+                request.user.set_password(new_password)
+                request.user.save()
+                messages.success(request, "Password changed successfully. Please log in again.")
+                return redirect("login")
+
+    profile = get_user_profile(request.user)
+    return render(request, "users/user_settings.html", {"user": request.user, "profile": profile})
 
 
 # ============================================================
