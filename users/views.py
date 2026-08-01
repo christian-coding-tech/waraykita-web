@@ -3,6 +3,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from .models import Item
 
 
 def is_admin(user):
@@ -43,17 +46,32 @@ def register_view(request):
         return redirect("user_dashboard")
 
     if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
+        confirm_password = request.POST.get("confirm_password", "")
 
         # Basic validation
-        if not username or not email or not password:
+        if not first_name or not last_name or not username or not email or not password:
             messages.error(request, "All fields are required.")
+            return redirect("login")
+
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect("login")
+
+        if len(password) < 8:
+            messages.error(request, "Password must be at least 8 characters long.")
             return redirect("login")
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists.")
+            return redirect("login")
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email is already registered.")
             return redirect("login")
 
         # Create a normal user (not staff, not superuser)
@@ -61,6 +79,8 @@ def register_view(request):
             username=username,
             email=email,
             password=password,
+            first_name=first_name,
+            last_name=last_name,
         )
         messages.success(
             request,
@@ -82,7 +102,30 @@ def admin_dashboard_view(request):
     if not (request.user.is_superuser or request.user.is_staff):
         return redirect("user_dashboard")
 
-    return render(request, "users/admin_dashboard.html", {"user": request.user})
+    # Real statistics from the database
+    total_users = User.objects.count()
+    total_items = Item.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    active_items = Item.objects.filter(is_active=True).count()
+
+    # Activity rate = percentage of active users
+    activity_rate = round((active_users / total_users * 100), 1) if total_users > 0 else 0
+
+    # "Reports" placeholder — count of inactive items as a proxy metric
+    inactive_items = Item.objects.filter(is_active=False).count()
+
+    # Recent users (latest 5)
+    recent_users = User.objects.all().order_by("-date_joined")[:5]
+
+    context = {
+        "user": request.user,
+        "total_users": total_users,
+        "total_items": total_items,
+        "activity_rate": activity_rate,
+        "reports_count": inactive_items,
+        "recent_users": recent_users,
+    }
+    return render(request, "users/admin_dashboard.html", context)
 
 
 @login_required(login_url="login")
@@ -198,3 +241,109 @@ def toggle_user_status_view(request, user_id):
     status = "activated" if target_user.is_active else "deactivated"
     messages.success(request, f"User '{target_user.username}' {status} successfully.")
     return redirect("manage_users")
+
+
+# ============================================================
+# Item / Product Management (Admin only)
+# ============================================================
+
+@user_passes_test(is_admin, login_url="login")
+def manage_items_view(request):
+    """List all items/products for admin management."""
+    items = Item.objects.all().order_by("-created_at")
+    return render(request, "users/manage_items.html", {"items": items})
+
+
+@user_passes_test(is_admin, login_url="login")
+def add_item_view(request):
+    """Add a new product from the admin panel."""
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        price = request.POST.get("price", "0").strip()
+        description = request.POST.get("description", "").strip()
+        details = request.POST.get("details", "").strip()
+        stock = request.POST.get("stock", "0").strip()
+        color_variant = request.POST.get("color_variant", "").strip()
+        is_active = request.POST.get("is_active") == "on"
+        image = request.FILES.get("image")
+
+        if not title:
+            messages.error(request, "Product title is required.")
+            return redirect("manage_items")
+
+        try:
+            price_val = float(price) if price else 0.00
+            stock_val = int(stock) if stock else 0
+        except ValueError:
+            messages.error(request, "Invalid price or stock value.")
+            return redirect("manage_items")
+
+        item = Item.objects.create(
+            title=title,
+            price=price_val,
+            description=description,
+            details=details,
+            stock=stock_val,
+            color_variant=color_variant,
+            is_active=is_active,
+        )
+        if image:
+            item.image = image
+            item.save()
+
+        messages.success(request, f"Product '{title}' created successfully.")
+        return redirect("manage_items")
+
+    return redirect("manage_items")
+
+
+@user_passes_test(is_admin, login_url="login")
+def toggle_item_status_view(request, item_id):
+    """Toggle a product's active/inactive status."""
+    item = get_object_or_404(Item, id=item_id)
+    item.is_active = not item.is_active
+    item.save()
+
+    status = "activated" if item.is_active else "deactivated"
+    messages.success(request, f"Product '{item.title}' {status} successfully.")
+    return redirect("manage_items")
+
+
+@user_passes_test(is_admin, login_url="login")
+def delete_item_view(request, item_id):
+    """Delete a product."""
+    item = get_object_or_404(Item, id=item_id)
+    title = item.title
+    # Remove image file from disk if present
+    if item.image:
+        try:
+            item.image.delete(save=False)
+        except Exception:
+            pass
+    item.delete()
+    messages.success(request, f"Product '{title}' deleted successfully.")
+    return redirect("manage_items")
+
+
+# ============================================================
+# Public Product API (for real-time updates on user dashboard)
+# ============================================================
+
+@require_GET
+def api_active_items_view(request):
+    """Return active products as JSON for the user dashboard polling."""
+    items = Item.objects.filter(is_active=True).order_by("-created_at")
+    data = []
+    for it in items:
+        data.append({
+            "id": it.id,
+            "title": it.title,
+            "price": str(it.price),
+            "description": it.description,
+            "details": it.details,
+            "stock": it.stock,
+            "color_variant": it.color_variant,
+            "image": request.build_absolute_uri(it.image.url) if it.image else None,
+            "created_at": it.created_at.isoformat(),
+        })
+    return JsonResponse({"items": data})

@@ -13,4 +13,11 @@ urlpatterns = [
     path("edit-user/<int:user_id>/", views.edit_user_view, name="edit_user"),
     path("delete-user/<int:user_id>/", views.delete_user_view, name="delete_user"),
     path("toggle-user/<int:user_id>/", views.toggle_user_status_view, name="toggle_user"),
+    # Item / Product management (admin only)
+    path("manage-items/", views.manage_items_view, name="manage_items"),
+    path("add-item/", views.add_item_view, name="add_item"),
+    path("toggle-item/<int:item_id>/", views.toggle_item_status_view, name="toggle_item"),
+    path("delete-item/<int:item_id>/", views.delete_item_view, name="delete_item"),
+    # Public product API (for real-time updates)
+    path("api/active-items/", views.api_active_items_view, name="api_active_items"),
 ]

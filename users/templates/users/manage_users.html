@@ -13,14 +13,14 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="logo"><i class="fa-solid fa-handshake"></i></div>
+                <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
                 <h2>Waray<span>Kita</span></h2>
             </div>
             <nav class="sidebar-nav">
                 <p class="nav-label">Main</p>
                 <a href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
                 <a href="{% url 'manage_users' %}" class="active"><i class="fa-solid fa-users"></i> Users</a>
-                <a href="#"><i class="fa-solid fa-box"></i> Items</a>
+                <a href="{% url 'manage_items' %}"><i class="fa-solid fa-box"></i> Items</a>
                 <a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a>
                 <p class="nav-label">Management</p>
                 <a href="#"><i class="fa-solid fa-shield-halved"></i> Roles</a>

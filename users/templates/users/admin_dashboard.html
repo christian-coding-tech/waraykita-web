@@ -13,14 +13,14 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="logo"><i class="fa-solid fa-handshake"></i></div>
+                <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
                 <h2>Waray<span>Kita</span></h2>
             </div>
             <nav class="sidebar-nav">
                 <p class="nav-label">Main</p>
                 <a href="{% url 'admin_dashboard' %}" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
                 <a href="{% url 'manage_users' %}"><i class="fa-solid fa-users"></i> Users</a>
-                <a href="#"><i class="fa-solid fa-box"></i> Items</a>
+                <a href="{% url 'manage_items' %}"><i class="fa-solid fa-box"></i> Items</a>
                 <a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a>
                 <p class="nav-label">Management</p>
                 <a href="#"><i class="fa-solid fa-shield-halved"></i> Roles</a>
@@ -67,29 +67,29 @@
                     <div class="stat-card">
                         <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
                         <div class="stat-info">
-                            <h3>1,248</h3>
+                            <h3>{{ total_users }}</h3>
                             <p>Total Users</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon green"><i class="fa-solid fa-box"></i></div>
                         <div class="stat-info">
-                            <h3>356</h3>
+                            <h3>{{ total_items }}</h3>
                             <p>Total Items</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon orange"><i class="fa-solid fa-chart-line"></i></div>
                         <div class="stat-info">
-                            <h3>89%</h3>
+                            <h3>{{ activity_rate }}%</h3>
                             <p>Activity Rate</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div class="stat-info">
-                            <h3>12</h3>
-                            <p>Reports</p>
+                            <h3>{{ reports_count }}</h3>
+                            <p>Inactive Items</p>
                         </div>
                     </div>
                 </div>
@@ -113,36 +113,34 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {% for u in recent_users %}
                                     <tr>
-                                        <td>juan_delacruz</td>
-                                        <td>juan@example.com</td>
-                                        <td>User</td>
-                                        <td><span class="status-badge active">Active</span></td>
+                                        <td><strong>{{ u.username }}</strong></td>
+                                        <td>{{ u.email|default:"—" }}</td>
+                                        <td>
+                                            {% if u.is_superuser %}
+                                                <span class="status-badge pending">Superuser</span>
+                                            {% elif u.is_staff %}
+                                                <span class="status-badge pending">Staff</span>
+                                            {% else %}
+                                                <span class="status-badge active">User</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if u.is_active %}
+                                                <span class="status-badge active">Active</span>
+                                            {% else %}
+                                                <span class="status-badge inactive">Inactive</span>
+                                            {% endif %}
+                                        </td>
                                     </tr>
+                                    {% empty %}
                                     <tr>
-                                        <td>maria_santos</td>
-                                        <td>maria@example.com</td>
-                                        <td>User</td>
-                                        <td><span class="status-badge pending">Pending</span></td>
+                                        <td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">
+                                            No users yet.
+                                        </td>
                                     </tr>
-                                    <tr>
-                                        <td>pedro_reyes</td>
-                                        <td>pedro@example.com</td>
-                                        <td>Editor</td>
-                                        <td><span class="status-badge active">Active</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>ana_lim</td>
-                                        <td>ana@example.com</td>
-                                        <td>User</td>
-                                        <td><span class="status-badge inactive">Inactive</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>carlos_tan</td>
-                                        <td>carlos@example.com</td>
-                                        <td>Moderator</td>
-                                        <td><span class="status-badge active">Active</span></td>
-                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
@@ -196,7 +194,7 @@
                             <i class="fa-solid fa-user-plus"></i>
                             <span>Add User</span>
                         </a>
-                        <a href="#" class="quick-action">
+                        <a href="{% url 'manage_items' %}" class="quick-action">
                             <i class="fa-solid fa-box-open"></i>
                             <span>Add Item</span>
                         </a>

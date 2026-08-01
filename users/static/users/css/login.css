@@ -73,9 +73,42 @@ form {
     visibility: visible;
 }
 
+/* Scrollable form fields for registration (button stays fixed) */
+.form-box.register form {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+.form-fields {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-bottom: 10px;
+}
+
+/* Scrollbar styling for register form fields */
+.form-fields::-webkit-scrollbar {
+    width: 5px;
+}
+
+.form-fields::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.form-fields::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
 .input-box {
     position: relative;
-    margin: 30px 0;
+    margin: 20px 0;
+}
+
+.form-box.register .input-box {
+    margin: 16px 0;
 }
 
 .input-box input{
@@ -101,6 +134,25 @@ form {
     top: 50%;
     transform: translateY(-50%);
     font-size: 20px;
+}
+
+/* Password toggle icon — positioned to the left of the lock icon to prevent overlap */
+.input-box .toggle-password {
+    right: 50px;
+    cursor: pointer;
+    color: #888;
+    font-size: 18px;
+    transition: 0.2s;
+    z-index: 2;
+}
+
+.input-box .toggle-password:hover {
+    color: #333;
+}
+
+/* When input has a toggle, add extra right padding so text doesn't go under icons */
+.input-box.has-toggle input {
+    padding-right: 80px;
 }
 
 .forgot-link {
@@ -243,4 +295,6 @@ form {
     background: #e7f0ff;
     color: #3a6fd8;
     border: 1px solid #b9d0ff;
-}
+}  
+/* Toggle panel logo */  
+.toggle-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 15px; border-radius: 16px; } 

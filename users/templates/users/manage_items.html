@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Items | Waray Kita</title>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
+                <h2>Waray<span>Kita</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <p class="nav-label">Main</p>
+                <a href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="{% url 'manage_users' %}"><i class="fa-solid fa-users"></i> Users</a>
+                <a href="{% url 'manage_items' %}" class="active"><i class="fa-solid fa-box"></i> Items</a>
+                <a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a>
+                <p class="nav-label">Management</p>
+                <a href="#"><i class="fa-solid fa-shield-halved"></i> Roles</a>
+                <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="#"><i class="fa-solid fa-database"></i> Database</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <div class="avatar">{{ request.user.username|first|upper }}</div>
+                    <div class="info">
+                        <p>{{ request.user.username }}</p>
+                        <small>Administrator</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Topbar -->
+            <header class="topbar">
+                <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                <h1>Manage Items</h1>
+                <div class="topbar-right">
+                    <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">5</span></div>
+                    <div class="icon-btn"><i class="fa-solid fa-envelope"></i><span class="badge">3</span></div>
+                    <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Alert Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div class="dashboard-alert success">
+                                <i class="fa-solid fa-circle-check"></i> {{ message }}
+                            </div>
+                        {% elif message.tags == 'error' %}
+                            <div class="dashboard-alert error">
+                                <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h2><i class="fa-solid fa-box"></i> All Products ({{ items|length }})</h2>
+                    <button class="btn-primary" onclick="openAddModal()">
+                        <i class="fa-solid fa-plus"></i> Add Product
+                    </button>
+                </div>
+
+                <!-- Items Table -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Product List</h3>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Image</th>
+                                    <th>Title</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Color</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td>
+                                        {% if item.image %}
+                                            <img src="{{ item.image.url }}" alt="{{ item.title }}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">
+                                        {% else %}
+                                            <div style="width:50px;height:50px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#aaa;">
+                                                <i class="fa-solid fa-image"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ item.title }}</strong></td>
+                                    <td>₱{{ item.price }}</td>
+                                    <td>{{ item.stock }}</td>
+                                    <td>{{ item.color_variant|default:"—" }}</td>
+                                    <td>
+                                        {% if item.is_active %}
+                                            <span class="status-badge active">Active</span>
+                                        {% else %}
+                                            <span class="status-badge inactive">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <a href="{% url 'toggle_item' item.id %}" class="btn-sm btn-toggle">
+                                                {% if item.is_active %}
+                                                    <i class="fa-solid fa-ban"></i> Disable
+                                                {% else %}
+                                                    <i class="fa-solid fa-check"></i> Enable
+                                                {% endif %}
+                                            </a>
+                                            <form action="{% url 'delete_item' item.id %}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete product \'{{ item.title }}\'? This cannot be undone.');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn-sm btn-danger">
+                                                    <i class="fa-solid fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" style="text-align:center;color:var(--muted);padding:30px;">
+                                        No products yet. Click "Add Product" to create one.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal-overlay" id="addItemModal">
+        <div class="modal" style="max-width:600px;max-height:90vh;overflow-y:auto;">
+            <h3><i class="fa-solid fa-box-open"></i> Add New Product</h3>
+            <form action="{% url 'add_item' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Product Title <span style="color:var(--danger);">*</span></label>
+                    <input type="text" name="title" placeholder="Enter product title" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₱)</label>
+                    <input type="number" name="price" step="0.01" min="0" placeholder="0.00" value="0.00">
+                </div>
+                <div class="form-group">
+                    <label>Stock</label>
+                    <input type="number" name="stock" min="0" placeholder="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Color Variant</label>
+                    <input type="text" name="color_variant" placeholder="e.g. Red, Blue, Black">
+                </div>
+                <div class="form-group">
+                    <label>Short Description</label>
+                    <textarea name="description" rows="3" placeholder="Brief product description" style="width:100%;padding:12px 16px;background:#f4f6fb;border:1px solid #e0e0e0;border-radius:8px;font-size:15px;color:var(--text);outline:none;transition:0.2s;font-family:inherit;resize:vertical;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Details</label>
+                    <textarea name="details" rows="4" placeholder="Full product details / specifications" style="width:100%;padding:12px 16px;background:#f4f6fb;border:1px solid #e0e0e0;border-radius:8px;font-size:15px;color:var(--text);outline:none;transition:0.2s;font-family:inherit;resize:vertical;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" name="image" accept="image/*" style="width:100%;padding:10px;background:#f4f6fb;border:1px solid #e0e0e0;border-radius:8px;font-size:15px;">
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" name="is_active" id="is_active" checked>
+                        <label for="is_active">Active (visible to users immediately)</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary"><i class="fa-solid fa-check"></i> Create Product</button>
+                    <button type="button" class="btn-secondary" onclick="closeAddModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function openAddModal() {
+            document.getElementById('addItemModal').classList.add('show');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addItemModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('addItemModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -13,15 +13,15 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="logo"><i class="fa-solid fa-handshake"></i></div>
+                <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
                 <h2>Waray<span>Kita</span></h2>
             </div>
             <nav class="sidebar-nav">
                 <p class="nav-label">Main</p>
-                <a href="{% url 'user_dashboard' %}" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-                <a href="#"><i class="fa-solid fa-house"></i> Home</a>
-                <a href="#"><i class="fa-solid fa-compass"></i> Explore</a>
-                <a href="#"><i class="fa-solid fa-heart"></i> Favorites</a>
+                <a href="#" class="nav-link active" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="#" class="nav-link" data-page="home"><i class="fa-solid fa-house"></i> Home</a>
+                <a href="#" class="nav-link" data-page="explore"><i class="fa-solid fa-compass"></i> Explore</a>
+                <a href="#" class="nav-link" data-page="favorites"><i class="fa-solid fa-heart"></i> Favorites</a>
                 <p class="nav-label">Account</p>
                 <a href="#"><i class="fa-solid fa-user"></i> Profile</a>
                 <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
@@ -43,7 +43,7 @@
             <!-- Topbar -->
             <header class="topbar">
                 <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
-                <h1>My Dashboard</h1>
+                <h1 id="pageTitle">My Dashboard</h1>
                 <div class="topbar-right">
                     <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">2</span></div>
                     <div class="icon-btn"><i class="fa-solid fa-envelope"></i></div>
@@ -53,87 +53,61 @@
 
             <!-- Content -->
             <main class="content">
-                <!-- Welcome Banner -->
-                <div class="welcome-banner">
-                    <div>
-                        <h2>Hello, {{ user.username }}!</h2>
-                        <p>Welcome to your personal dashboard. Here's your latest activity.</p>
+                <!-- ============================================================ -->
+                <!-- DASHBOARD PAGE -->
+                <!-- ============================================================ -->
+                <div class="page-content active" id="page-dashboard">
+                    <!-- Welcome Banner -->
+                    <div class="welcome-banner">
+                        <div>
+                            <h2>Hello, {{ user.username }}!</h2>
+                            <p>Welcome to your personal dashboard. Here's your latest activity.</p>
+                        </div>
+                        <img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita" class="banner-logo">
                     </div>
-                    <i class="fa-solid fa-hand banner-icon"></i>
-                </div>
 
-                <!-- Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon blue"><i class="fa-solid fa-box"></i></div>
-                        <div class="stat-info">
-                            <h3>24</h3>
-                            <p>My Items</p>
+                    <!-- Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-box"></i></div>
+                            <div class="stat-info">
+                                <h3 id="statTotalProducts">—</h3>
+                                <p>Products</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-heart"></i></div>
+                            <div class="stat-info">
+                                <h3 id="statFavorites">0</h3>
+                                <p>Favorites</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange"><i class="fa-solid fa-eye"></i></div>
+                            <div class="stat-info">
+                                <h3 id="statInStock">—</h3>
+                                <p>In Stock</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="fa-solid fa-palette"></i></div>
+                            <div class="stat-info">
+                                <h3 id="statColors">—</h3>
+                                <p>Color Variants</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon green"><i class="fa-solid fa-heart"></i></div>
-                        <div class="stat-info">
-                            <h3>58</h3>
-                            <p>Favorites</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon orange"><i class="fa-solid fa-eye"></i></div>
-                        <div class="stat-info">
-                            <h3>1.2k</h3>
-                            <p>Profile Views</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon red"><i class="fa-solid fa-bell"></i></div>
-                        <div class="stat-info">
-                            <h3>2</h3>
-                            <p>Notifications</p>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Two Column -->
-                <div class="two-col">
-                    <!-- My Items Table -->
+                    <!-- Latest Products -->
                     <div class="panel">
                         <div class="panel-header">
-                            <h3>My Recent Items</h3>
-                            <a href="#">View All</a>
+                            <h3><i class="fa-solid fa-box"></i> Latest Products</h3>
+                            <a href="#" onclick="switchPage('explore'); return false;">View All</a>
                         </div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        <th>Date Added</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Sample Item 1</td>
-                                        <td>Jul 28, 2026</td>
-                                        <td><span class="status-badge active">Active</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sample Item 2</td>
-                                        <td>Jul 25, 2026</td>
-                                        <td><span class="status-badge pending">Pending</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sample Item 3</td>
-                                        <td>Jul 20, 2026</td>
-                                        <td><span class="status-badge active">Active</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sample Item 4</td>
-                                        <td>Jul 15, 2026</td>
-                                        <td><span class="status-badge inactive">Archived</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div id="dashboardProductsGrid" class="products-grid">
+                            <div class="products-loading">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading products...
+                            </div>
                         </div>
                     </div>
 
@@ -159,28 +133,132 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <h3>Quick Actions</h3>
+                <!-- ============================================================ -->
+                <!-- HOME PAGE -->
+                <!-- ============================================================ -->
+                <div class="page-content" id="page-home">
+                    <!-- Hero Banner -->
+                    <div class="hero-banner">
+                        <div class="hero-content">
+                            <h2><i class="fa-solid fa-house"></i> Welcome to Waray Kita</h2>
+                            <p>Discover amazing products from local sellers. Your one-stop shop for everything you need.</p>
+                            <button class="btn-primary" onclick="switchPage('explore')">
+                                <i class="fa-solid fa-compass"></i> Start Exploring
+                            </button>
+                        </div>
+                        <div class="hero-icons">
+                            <img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita" class="hero-logo">
+                        </div>
                     </div>
-                    <div class="quick-actions">
-                        <a href="#" class="quick-action">
-                            <i class="fa-solid fa-plus"></i>
-                            <span>New Item</span>
-                        </a>
-                        <a href="#" class="quick-action">
-                            <i class="fa-solid fa-pen"></i>
-                            <span>Edit Profile</span>
-                        </a>
-                        <a href="#" class="quick-action">
-                            <i class="fa-solid fa-compass"></i>
-                            <span>Explore</span>
-                        </a>
-                        <a href="#" class="quick-action">
-                            <i class="fa-solid fa-gear"></i>
-                            <span>Settings</span>
-                        </a>
+
+                    <!-- Featured Categories -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-tags"></i> Browse by Category</h3>
+                        </div>
+                        <div class="category-grid" id="categoryGrid">
+                            <div class="category-card" onclick="filterByColor('')">
+                                <i class="fa-solid fa-border-all"></i>
+                                <span>All Items</span>
+                            </div>
+                            <div class="category-card" onclick="filterByColor('Red')">
+                                <i class="fa-solid fa-droplet" style="color:#e74c3c;"></i>
+                                <span>Red</span>
+                            </div>
+                            <div class="category-card" onclick="filterByColor('Blue')">
+                                <i class="fa-solid fa-droplet" style="color:#3498db;"></i>
+                                <span>Blue</span>
+                            </div>
+                            <div class="category-card" onclick="filterByColor('Black')">
+                                <i class="fa-solid fa-droplet" style="color:#333;"></i>
+                                <span>Black</span>
+                            </div>
+                            <div class="category-card" onclick="filterByColor('White')">
+                                <i class="fa-solid fa-droplet" style="color:#999;"></i>
+                                <span>White</span>
+                            </div>
+                            <div class="category-card" onclick="filterByColor('Green')">
+                                <i class="fa-solid fa-droplet" style="color:#2ecc71;"></i>
+                                <span>Green</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Featured Products -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-star"></i> Featured Products</h3>
+                            <a href="#" onclick="switchPage('explore'); return false;">View All</a>
+                        </div>
+                        <div id="homeProductsGrid" class="products-grid">
+                            <div class="products-loading">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading products...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- EXPLORE PAGE -->
+                <!-- ============================================================ -->
+                <div class="page-content" id="page-explore">
+                    <!-- Search & Filter Bar -->
+                    <div class="panel">
+                        <div class="explore-toolbar">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="searchInput" placeholder="Search products by name or description..." oninput="handleSearch()">
+                            </div>
+                            <select id="colorFilter" onchange="handleFilter()" class="filter-select">
+                                <option value="">All Colors</option>
+                            </select>
+                            <select id="stockFilter" onchange="handleFilter()" class="filter-select">
+                                <option value="">All Stock</option>
+                                <option value="in">In Stock</option>
+                                <option value="out">Out of Stock</option>
+                            </select>
+                            <select id="sortFilter" onchange="handleFilter()" class="filter-select">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="name">Name A-Z</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Explore Results -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-compass"></i> Explore Products</h3>
+                            <span id="exploreCount" style="font-size:14px;color:var(--muted);">Loading...</span>
+                        </div>
+                        <div id="exploreProductsGrid" class="products-grid">
+                            <div class="products-loading">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading products...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- FAVORITES PAGE -->
+                <!-- ============================================================ -->
+                <div class="page-content" id="page-favorites">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-heart"></i> Your Favorite Products</h3>
+                            <span id="favoritesCount" style="font-size:14px;color:var(--muted);">0 favorites</span>
+                        </div>
+                        <div id="favoritesGrid" class="products-grid">
+                            <div class="products-empty">
+                                <i class="fa-solid fa-heart-crack"></i>
+                                <p>No favorites yet. Click the heart icon on any product to add it here!</p>
+                                <button class="btn-primary" style="margin-top:15px;" onclick="switchPage('explore')">
+                                    <i class="fa-solid fa-compass"></i> Browse Products
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -191,6 +269,321 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
         }
+
+        // ============================================================
+        // Page Navigation (SPA-style tab switching)
+        // ============================================================
+        const pageTitles = {
+            dashboard: "My Dashboard",
+            home: "Home",
+            explore: "Explore",
+            favorites: "Favorites"
+        };
+
+        function switchPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+
+            // Show target page
+            const target = document.getElementById('page-' + pageName);
+            if (target) {
+                target.classList.add('active');
+            }
+
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-page') === pageName) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Update title
+            document.getElementById('pageTitle').textContent = pageTitles[pageName] || "My Dashboard";
+
+            // Load page-specific data
+            if (pageName === 'favorites') {
+                renderFavorites();
+            }
+
+            // Close sidebar on mobile
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        // Attach click handlers to nav links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.getAttribute('data-page');
+                if (page) switchPage(page);
+            });
+        });
+
+        // ============================================================
+        // Data store
+        // ============================================================
+        const API_URL = "{% url 'api_active_items' %}";
+        let allProducts = [];
+        let favorites = new Set(JSON.parse(localStorage.getItem('waraykita_favorites') || '[]'));
+
+        // ============================================================
+        // Helpers
+        // ============================================================
+        function escapeHtml(str) {
+            if (!str) return "";
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatPrice(price) {
+            const num = parseFloat(price) || 0;
+            return num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function toggleFavorite(id) {
+            id = parseInt(id);
+            if (favorites.has(id)) {
+                favorites.delete(id);
+            } else {
+                favorites.add(id);
+            }
+            localStorage.setItem('waraykita_favorites', JSON.stringify([...favorites]));
+            updateFavoriteCounts();
+            // Re-render current view
+            const activePage = document.querySelector('.page-content.active').id;
+            if (activePage === 'page-favorites') {
+                renderFavorites();
+            } else {
+                renderAllGrids();
+            }
+        }
+
+        function updateFavoriteCounts() {
+            document.getElementById('statFavorites').textContent = favorites.size;
+            document.getElementById('favoritesCount').textContent = favorites.size + (favorites.size === 1 ? " favorite" : " favorites");
+        }
+
+        function getFavoriteHeart(id) {
+            const isFav = favorites.has(parseInt(id));
+            return `<i class="fa-${isFav ? 'solid' : 'regular'} fa-heart fav-toggle ${isFav ? 'fav-active' : ''}" onclick="toggleFavorite(${id})" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}"></i>`;
+        }
+
+        function buildProductCard(item, isNew) {
+            const imgHtml = item.image
+                ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" class="product-img">`
+                : `<div class="product-img-placeholder"><i class="fa-solid fa-image"></i></div>`;
+
+            const colorHtml = item.color_variant
+                ? `<span class="product-color"><i class="fa-solid fa-palette"></i> ${escapeHtml(item.color_variant)}</span>`
+                : '';
+
+            const stockBadge = item.stock > 0
+                ? `<span class="status-badge active">In Stock (${item.stock})</span>`
+                : `<span class="status-badge inactive">Out of Stock</span>`;
+
+            return `
+                <div class="product-card${isNew ? ' product-new' : ''}" data-id="${item.id}">
+                    <div class="product-img-wrap">
+                        ${imgHtml}
+                        ${getFavoriteHeart(item.id)}
+                    </div>
+                    <div class="product-body">
+                        <h4 class="product-title">${escapeHtml(item.title)}</h4>
+                        <p class="product-price">₱${formatPrice(item.price)}</p>
+                        ${item.description ? `<p class="product-desc">${escapeHtml(item.description)}</p>` : ''}
+                        <div class="product-meta">
+                            ${colorHtml}
+                            ${stockBadge}
+                        </div>
+                        ${item.details ? `<details class="product-details"><summary>View details</summary><p>${escapeHtml(item.details)}</p></details>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // Dashboard page — latest 4 products + stats
+        // ============================================================
+        function renderDashboard() {
+            const grid = document.getElementById('dashboardProductsGrid');
+            const items = allProducts.slice(0, 4);
+
+            if (!items.length) {
+                grid.innerHTML = '<div class="products-empty"><i class="fa-solid fa-box-open"></i><p>No products available yet.</p></div>';
+            } else {
+                grid.innerHTML = items.map(i => buildProductCard(i, false)).join('');
+            }
+
+            // Update stats
+            document.getElementById('statTotalProducts').textContent = allProducts.length;
+            document.getElementById('statInStock').textContent = allProducts.filter(i => i.stock > 0).length;
+            const colors = new Set(allProducts.map(i => i.color_variant).filter(c => c));
+            document.getElementById('statColors').textContent = colors.size;
+        }
+
+        // ============================================================
+        // Home page — featured products (first 8)
+        // ============================================================
+        function renderHome() {
+            const grid = document.getElementById('homeProductsGrid');
+            const items = allProducts.slice(0, 8);
+
+            if (!items.length) {
+                grid.innerHTML = '<div class="products-empty"><i class="fa-solid fa-box-open"></i><p>No products available yet. Check back soon!</p></div>';
+            } else {
+                grid.innerHTML = items.map(i => buildProductCard(i, false)).join('');
+            }
+        }
+
+        // ============================================================
+        // Explore page — search, filter, sort
+        // ============================================================
+        function renderExplore() {
+            const grid = document.getElementById('exploreProductsGrid');
+            const countEl = document.getElementById('exploreCount');
+
+            const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const colorFilter = document.getElementById('colorFilter')?.value || '';
+            const stockFilter = document.getElementById('stockFilter')?.value || '';
+            const sortFilter = document.getElementById('sortFilter')?.value || 'newest';
+
+            let items = [...allProducts];
+
+            // Search
+            if (searchTerm) {
+                items = items.filter(i =>
+                    (i.title || '').toLowerCase().includes(searchTerm) ||
+                    (i.description || '').toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Color filter
+            if (colorFilter) {
+                items = items.filter(i => (i.color_variant || '').toLowerCase() === colorFilter.toLowerCase());
+            }
+
+            // Stock filter
+            if (stockFilter === 'in') {
+                items = items.filter(i => i.stock > 0);
+            } else if (stockFilter === 'out') {
+                items = items.filter(i => i.stock <= 0);
+            }
+
+            // Sort
+            switch (sortFilter) {
+                case 'oldest':
+                    items.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    break;
+                case 'price-low':
+                    items.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+                    break;
+                case 'price-high':
+                    items.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+                    break;
+                case 'name':
+                    items.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+                    break;
+                default:
+                    items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+
+            countEl.textContent = items.length + (items.length === 1 ? " product" : " products");
+
+            if (!items.length) {
+                grid.innerHTML = '<div class="products-empty"><i class="fa-solid fa-magnifying-glass"></i><p>No products match your search. Try different filters!</p></div>';
+            } else {
+                grid.innerHTML = items.map(i => buildProductCard(i, false)).join('');
+            }
+        }
+
+        function handleSearch() {
+            renderExplore();
+        }
+
+        function handleFilter() {
+            renderExplore();
+        }
+
+        function filterByColor(color) {
+            switchPage('explore');
+            setTimeout(() => {
+                const select = document.getElementById('colorFilter');
+                if (select) {
+                    select.value = color;
+                    renderExplore();
+                }
+            }, 100);
+        }
+
+        // Populate color filter options from data
+        function populateColorFilter() {
+            const select = document.getElementById('colorFilter');
+            if (!select) return;
+            const colors = [...new Set(allProducts.map(i => i.color_variant).filter(c => c))].sort();
+            // Keep the "All Colors" option, clear the rest
+            select.innerHTML = '<option value="">All Colors</option>';
+            colors.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                select.appendChild(opt);
+            });
+        }
+
+        // ============================================================
+        // Favorites page
+        // ============================================================
+        function renderFavorites() {
+            const grid = document.getElementById('favoritesGrid');
+            const favItems = allProducts.filter(i => favorites.has(i.id));
+
+            if (!favItems.length) {
+                grid.innerHTML = `
+                    <div class="products-empty">
+                        <i class="fa-solid fa-heart-crack"></i>
+                        <p>No favorites yet. Click the heart icon on any product to add it here!</p>
+                        <button class="btn-primary" style="margin-top:15px;" onclick="switchPage('explore')">
+                            <i class="fa-solid fa-compass"></i> Browse Products
+                        </button>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = favItems.map(i => buildProductCard(i, false)).join('');
+            }
+            updateFavoriteCounts();
+        }
+
+        // ============================================================
+        // Render all grids
+        // ============================================================
+        function renderAllGrids() {
+            renderDashboard();
+            renderHome();
+            renderExplore();
+            populateColorFilter();
+            updateFavoriteCounts();
+        }
+
+        // ============================================================
+        // Fetch products from API
+        // ============================================================
+        async function fetchProducts() {
+            try {
+                const res = await fetch(API_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) throw new Error('Network response was not ok');
+                const data = await res.json();
+                allProducts = data.items;
+                renderAllGrids();
+            } catch (err) {
+                console.error('Failed to fetch products:', err);
+            }
+        }
+
+        // Initial load
+        fetchProducts();
+        // Poll every 5 seconds for real-time updates
+        setInterval(fetchProducts, 5000);
     </script>
 </body>
 </html>

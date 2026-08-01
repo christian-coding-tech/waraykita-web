@@ -1,0 +1,4 @@
+Requirement already satisfied: Pillow in C:\Users\Staff\AppData\Local\Programs\Python\Python312\Lib\site-packages (12.3.0)
+
+[notice] A new release of pip is available: 26.1.2 -> 26.2
+[notice] To update, run: python.exe -m pip install --upgrade pip
