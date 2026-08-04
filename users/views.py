@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from django.db.models import Count, Sum
+from django.db import connection
 from .models import Item, Profile
 
 
@@ -115,7 +117,7 @@ def admin_dashboard_view(request):
     active_users = User.objects.filter(is_active=True).count()
     active_items = Item.objects.filter(is_active=True).count()
 
-    # Activity rate = percentage of active users
+# Activity rate = percentage of active users
     activity_rate = round((active_users / total_users * 100), 1) if total_users > 0 else 0
 
     # "Reports" placeholder — count of inactive items as a proxy metric
@@ -134,6 +136,91 @@ def admin_dashboard_view(request):
         "recent_users": recent_users,
     }
     return render(request, "users/admin_dashboard.html", context)
+
+
+@login_required(login_url="login")
+def reports_view(request):
+    """Admin reports page — statistics and breakdowns."""
+    if not (request.user.is_superuser or request.user.is_staff):
+        return redirect("user_dashboard")
+
+    # --- User statistics ---
+    total_users = User.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    inactive_users = User.objects.filter(is_active=False).count()
+    staff_users = User.objects.filter(is_staff=True).count()
+    superuser_count = User.objects.filter(is_superuser=True).count()
+
+    # --- Item statistics ---
+    total_items = Item.objects.count()
+    active_items = Item.objects.filter(is_active=True).count()
+    inactive_items = Item.objects.filter(is_active=False).count()
+    in_stock_items = Item.objects.filter(stock__gt=0).count()
+    out_of_stock_items = Item.objects.filter(stock=0).count()
+
+    # Total inventory value (sum of prices for active items)
+    inventory_value = Item.objects.filter(is_active=True).aggregate(
+        total=Sum("price")
+    )["total"] or 0
+    inventory_value = float(inventory_value)
+
+    # --- Breakdowns ---
+    # Items grouped by color
+    color_breakdown = (
+        Item.objects.values("color_variant")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+
+    # Items grouped by stock status
+    stock_breakdown = [
+        {"label": "In Stock", "count": in_stock_items},
+        {"label": "Out of Stock", "count": out_of_stock_items},
+    ]
+
+    # Users grouped by role
+    role_breakdown = [
+        {"label": "Superuser", "count": superuser_count},
+        {"label": "Staff", "count": staff_users},
+        {"label": "Regular", "count": max(total_users - staff_users, 0)},
+    ]
+
+    # Users grouped by status
+    user_status_breakdown = [
+        {"label": "Active", "count": active_users},
+        {"label": "Inactive", "count": inactive_users},
+    ]
+
+    # --- Recent data ---
+    recent_users = User.objects.all().order_by("-date_joined")[:5]
+    recent_items = Item.objects.all().order_by("-created_at")[:8]
+
+    # Top products by stock level
+    top_products = Item.objects.all().order_by("-stock")[:5]
+
+    context = {
+        "user": request.user,
+        "profile": get_user_profile(request.user),
+        "total_users": total_users,
+        "active_users": active_users,
+        "inactive_users": inactive_users,
+        "staff_users": staff_users,
+        "superuser_count": superuser_count,
+        "total_items": total_items,
+        "active_items": active_items,
+        "inactive_items": inactive_items,
+        "in_stock_items": in_stock_items,
+        "out_of_stock_items": out_of_stock_items,
+        "inventory_value": inventory_value,
+        "color_breakdown": color_breakdown,
+        "stock_breakdown": stock_breakdown,
+        "role_breakdown": role_breakdown,
+        "user_status_breakdown": user_status_breakdown,
+        "recent_users": recent_users,
+        "recent_items": recent_items,
+        "top_products": top_products,
+    }
+    return render(request, "users/reports.html", context)
 
 
 @login_required(login_url="login")
@@ -301,6 +388,67 @@ def toggle_user_status_view(request, user_id):
 
 
 # ============================================================
+# Roles Management (Admin only)
+# ============================================================
+
+@user_passes_test(is_admin, login_url="login")
+def manage_roles_view(request):
+    """Manage user roles (Superuser / Staff / Regular)."""
+    if request.method == "POST":
+        action = request.POST.get("action")
+        user_id = request.POST.get("user_id")
+
+        if action and user_id:
+            target_user = get_object_or_404(User, id=user_id)
+            username = target_user.username
+
+            if action == "make_staff":
+                # Prevent demoting/downgrading the currently logged-in superuser
+                if target_user.id == request.user.id and request.user.is_superuser:
+                    messages.error(request, "You cannot change your own role.")
+                else:
+                    target_user.is_staff = True
+                    target_user.is_superuser = False
+                    target_user.save()
+                    messages.success(request, f"'{username}' is now a Staff member.")
+            elif action == "make_superuser":
+                if target_user.id == request.user.id and request.user.is_superuser:
+                    messages.error(request, "You cannot change your own role.")
+                else:
+                    target_user.is_staff = True
+                    target_user.is_superuser = True
+                    target_user.save()
+                    messages.success(request, f"'{username}' is now a Superuser.")
+            elif action == "make_user":
+                # Prevent downgrading the currently logged-in superuser
+                if target_user.id == request.user.id and request.user.is_superuser:
+                    messages.error(request, "You cannot change your own role.")
+                else:
+                    target_user.is_staff = False
+                    target_user.is_superuser = False
+                    target_user.save()
+                    messages.success(request, f"'{username}' is now a Regular user.")
+
+        return redirect("manage_roles")
+
+    users = User.objects.all().order_by("-is_superuser", "-is_staff", "username")
+
+    superuser_count = User.objects.filter(is_superuser=True).count()
+    staff_count = User.objects.filter(is_staff=True, is_superuser=False).count()
+    regular_count = User.objects.filter(is_staff=False, is_superuser=False).count()
+
+    context = {
+        "user": request.user,
+        "profile": get_user_profile(request.user),
+        "users": users,
+        "superuser_count": superuser_count,
+        "staff_count": staff_count,
+        "regular_count": regular_count,
+    }
+    return render(request, "users/manage_roles.html", context)
+
+
+# ============================================================
 # Item / Product Management (Admin only)
 # ============================================================
 
@@ -380,6 +528,77 @@ def delete_item_view(request, item_id):
     item.delete()
     messages.success(request, f"Product '{title}' deleted successfully.")
     return redirect("manage_items")
+
+
+# ============================================================
+# Database Management (Admin only)
+# ============================================================
+
+@user_passes_test(is_admin, login_url="login")
+def database_view(request):
+    """Display database tables, row counts, and database info."""
+    tables_info = []
+    total_records = 0
+    db_name = ""
+    db_engine = connection.vendor
+    db_path = ""
+    db_size = 0
+
+    try:
+        db_name = connection.settings_dict.get("NAME", "")
+        tables = connection.introspection.table_names()
+
+        with connection.cursor() as cursor:
+            for table in tables:
+                try:
+                    cursor.execute(f'SELECT COUNT(*) FROM "{table}"')
+                    row_count = cursor.fetchone()[0]
+                    total_records += row_count
+                except Exception:
+                    row_count = 0
+
+                try:
+                    columns = [c.name for c in connection.introspection.get_table_description(cursor, table)]
+                except Exception:
+                    columns = []
+
+                tables_info.append({
+                    "name": table,
+                    "rows": row_count,
+                    "columns": columns,
+                })
+
+        # Sort: app tables first, then django internal tables
+        tables_info.sort(key=lambda t: t["name"])
+
+        # SQLite file size
+        if connection.vendor == "sqlite":
+            import os
+            db_file = str(db_name)
+            if os.path.exists(db_file):
+                db_path = os.path.abspath(db_file)
+                db_size = os.path.getsize(db_file)
+    except Exception:
+        pass
+
+    def format_size(num_bytes):
+        for unit in ["B", "KB", "MB", "GB"]:
+            if num_bytes < 1024 or unit == "GB":
+                return f"{num_bytes:.2f} {unit}" if unit != "B" else f"{num_bytes} {unit}"
+            num_bytes /= 1024
+
+    context = {
+        "user": request.user,
+        "profile": get_user_profile(request.user),
+        "tables_info": tables_info,
+        "total_tables": len(tables_info),
+        "total_records": total_records,
+        "db_engine": db_engine,
+        "db_name": db_name,
+        "db_path": db_path,
+        "db_size_display": format_size(db_size) if db_size else "—",
+    }
+    return render(request, "users/database.html", context)
 
 
 # ============================================================

@@ -24,21 +24,41 @@
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar">
+            <script>
+                // Apply saved collapsed state instantly, skipping the expand->collapse animation
+                (function() {
+                    var sb = document.getElementById('sidebar');
+                    if (sb && window.innerWidth > 768) {
+                        var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                        var shouldCollapse = (saved === '1' || saved === 'true');
+                        // Disable transition so the sidebar does not animate on page load
+                        sb.style.transition = 'none';
+                        if (shouldCollapse) {
+                            sb.classList.add('collapsed');
+                        } else {
+                            sb.classList.remove('collapsed');
+                        }
+                        // Force reflow, then re-enable transitions for future toggles
+                        void sb.offsetWidth;
+                        sb.style.transition = '';
+                    }
+                })();
+            </script>
             <div class="sidebar-header">
                 <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
                 <h2>Waray<span>Kita</span></h2>
             </div>
             <nav class="sidebar-nav">
                 <p class="nav-label">Main</p>
-                <a href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-                <a href="{% url 'manage_users' %}" class="active"><i class="fa-solid fa-users"></i> Users</a>
-                <a href="{% url 'manage_items' %}"><i class="fa-solid fa-box"></i> Items</a>
-                <a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a>
+                <a href="{% url 'admin_dashboard' %}" data-title="Dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="{% url 'manage_users' %}" class="active" data-title="Users"><i class="fa-solid fa-users"></i> Users</a>
+                <a href="{% url 'manage_items' %}" data-title="Items"><i class="fa-solid fa-box"></i> Items</a>
+<a href="{% url 'reports' %}" data-title="Reports"><i class="fa-solid fa-chart-line"></i> Reports</a>
                 <p class="nav-label">Management</p>
-<a href="#"><i class="fa-solid fa-shield-halved"></i> Roles</a>
-                <a href="{% url 'admin_settings' %}"><i class="fa-solid fa-gear"></i> Settings</a>
-                <a href="#"><i class="fa-solid fa-database"></i> Database</a>
+<a href="{% url 'manage_roles' %}" data-title="Roles"><i class="fa-solid fa-shield-halved"></i> Roles</a>
+                <a href="{% url 'admin_settings' %}" data-title="Settings"><i class="fa-solid fa-gear"></i> Settings</a>
+<a href="{% url 'database' %}" data-title="Database"><i class="fa-solid fa-database"></i> Database</a>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-mini">
@@ -282,9 +302,31 @@
     </div>
 
 <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
+function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            if (window.innerWidth <= 768) {
+                // Mobile: slide off-canvas sidebar in/out
+                sidebar.classList.toggle('open');
+            } else {
+                // Desktop: expand / minimize (collapse) the sidebar
+                sidebar.classList.toggle('collapsed');
+                // Save sidebar state to localStorage
+                localStorage.setItem('waraykita_sidebar_collapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+            }
         }
+
+        // Restore sidebar state on page load
+        (function() {
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar && window.innerWidth > 768) {
+                var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                if (saved === '1') {
+                    sidebar.classList.add('collapsed');
+                } else if (saved === '0') {
+                    sidebar.classList.remove('collapsed');
+                }
+            }
+        })();
 
         // ============================================================
         // Notification & Message Dropdowns

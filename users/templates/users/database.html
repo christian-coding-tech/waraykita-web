@@ -1,0 +1,349 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database | Waray Kita</title>
+    <style id="custom-theme-styles"></style>
+    <script>
+        (function() {
+            var theme = JSON.parse(localStorage.getItem('waraykita_theme'));
+            if (theme) {
+                function darken(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.max((n>>16)-a,0),G=Math.max((n>>8&0x00FF)-a,0),B=Math.max((n&0x0000FF)-a,0); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                function lighten(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.min((n>>16)+a,255),G=Math.min((n>>8&0x00FF)+a,255),B=Math.min((n&0x0000FF)+a,255); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                var s = document.getElementById('custom-theme-styles');
+                if (s) s.textContent = ':root{--primary:'+theme.primary+'!important;--primary-dark:'+darken(theme.primary,15)+'!important;--sidebar:'+theme.sidebar+'!important;--sidebar-hover:'+lighten(theme.sidebar,15)+'!important;--success:'+theme.success+'!important;--danger:'+theme.danger+'!important;}.welcome-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.hero-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.btn-primary:hover{box-shadow:0 6px 15px '+theme.primary+'4D!important;}';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+<script>
+                // Apply saved collapsed state instantly, skipping the expand->collapse animation
+                (function() {
+                    var sb = document.getElementById('sidebar');
+                    if (sb && window.innerWidth > 768) {
+                        var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                        var shouldCollapse = (saved === '1' || saved === 'true');
+                        // Disable transition so the sidebar does not animate on page load
+                        sb.style.transition = 'none';
+                        if (shouldCollapse) {
+                            sb.classList.add('collapsed');
+                        } else {
+                            sb.classList.remove('collapsed');
+                        }
+                        // Force reflow, then re-enable transitions for future toggles
+                        void sb.offsetWidth;
+                        sb.style.transition = '';
+                    }
+                })();
+            </script>
+            <div class="sidebar-header">
+                <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
+                <h2>Waray<span>Kita</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <p class="nav-label">Main</p>
+                <a href="{% url 'admin_dashboard' %}" data-title="Dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="{% url 'manage_users' %}" data-title="Users"><i class="fa-solid fa-users"></i> Users</a>
+                <a href="{% url 'manage_items' %}" data-title="Items"><i class="fa-solid fa-box"></i> Items</a>
+                <a href="{% url 'reports' %}" data-title="Reports"><i class="fa-solid fa-chart-line"></i> Reports</a>
+                <p class="nav-label">Management</p>
+                <a href="{% url 'manage_roles' %}" data-title="Roles"><i class="fa-solid fa-shield-halved"></i> Roles</a>
+                <a href="{% url 'admin_settings' %}" data-title="Settings"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="{% url 'database' %}" class="active" data-title="Database"><i class="fa-solid fa-database"></i> Database</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <div class="avatar">{{ user.username|first|upper }}</div>
+                    <div class="info">
+                        <p>{{ user.username }}</p>
+                        <small>Administrator</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Topbar -->
+            <header class="topbar">
+                <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                <h1>Database</h1>
+                <div class="topbar-right">
+                    <div class="icon-btn" onclick="toggleDropdown('notifDropdown', this)">
+                        <i class="fa-solid fa-bell"></i><span class="badge" id="notifBadge">5</span>
+                        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-bell"></i> Notifications</h4>
+                                <button class="notif-clear" onclick="clearNotifications()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="notifList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-user-plus"></i></div>
+                                    <div class="notif-content">
+                                        <p>New user registered</p>
+                                        <small>2 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-check"></i></div>
+                                    <div class="notif-content">
+                                        <p>Item approved</p>
+                                        <small>15 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                    <div class="notif-content">
+                                        <p>Report submitted</p>
+                                        <small>1 hour ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon red"><i class="fa-solid fa-box"></i></div>
+                                    <div class="notif-content">
+                                        <p>Product out of stock</p>
+                                        <small>3 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more notifications');">View All Notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-btn" onclick="toggleDropdown('msgDropdown', this)">
+                        <i class="fa-solid fa-envelope"></i><span class="badge" id="msgBadge">3</span>
+                        <div class="notif-dropdown" id="msgDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-envelope"></i> Messages</h4>
+                                <button class="notif-clear" onclick="clearMessages()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="msgList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-headset"></i></div>
+                                    <div class="notif-content">
+                                        <p>Support: Your ticket #1024 was resolved</p>
+                                        <small>10 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-user"></i></div>
+                                    <div class="notif-content">
+                                        <p>New inquiry from juan@gmail.com</p>
+                                        <small>32 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-bell"></i></div>
+                                    <div class="notif-content">
+                                        <p>System update scheduled tonight</p>
+                                        <small>2 hours ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon red"><i class="fa-solid fa-exclamation"></i></div>
+                                    <div class="notif-content">
+                                        <p>Payment issue reported by a user</p>
+                                        <small>Yesterday</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more messages');">View All Messages</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h2><i class="fa-solid fa-database"></i> Database Management</h2>
+                    <button class="btn-secondary" onclick="location.reload()">
+                        <i class="fa-solid fa-rotate"></i> Refresh
+                    </button>
+                </div>
+
+                <!-- Database Info Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fa-solid fa-table"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ total_tables }}</h3>
+                            <p>Tables</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fa-solid fa-database"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ total_records }}</h3>
+                            <p>Total Records</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fa-solid fa-server"></i></div>
+                        <div class="stat-info">
+                            <h3 style="font-size:20px;">{{ db_engine|upper }}</h3>
+                            <p>Database Engine</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fa-solid fa-hard-drive"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ db_size_display }}</h3>
+                            <p>Database Size</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Details -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-circle-info"></i> Database Information</h3>
+                    </div>
+                    <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                        <span style="color:var(--muted);">Engine</span>
+                        <span><span class="status-badge active">{{ db_engine|upper }}</span></span>
+                    </div>
+                    <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                        <span style="color:var(--muted);">Database Name</span>
+                        <span>{{ db_name }}</span>
+                    </div>
+                    <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                        <span style="color:var(--muted);">File Path</span>
+                        <span style="text-align:right;word-break:break-all;">{{ db_path|default:"—" }}</span>
+                    </div>
+                    <div class="profile-detail" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+                        <span style="color:var(--muted);">Size</span>
+                        <span>{{ db_size_display }}</span>
+                    </div>
+                </div>
+
+                <!-- Tables List -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-table-list"></i> Database Tables ({{ total_tables }})</h3>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Table Name</th>
+                                    <th>Records</th>
+                                    <th>Columns</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in tables_info %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <strong><i class="fa-solid fa-table" style="color:var(--primary);margin-right:8px;"></i>{{ t.name }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge {% if t.rows > 0 %}active{% else %}inactive{% endif %}">{{ t.rows }}</span>
+                                    </td>
+                                    <td style="font-size:13px;color:var(--muted);">
+                                        {{ t.columns|join:", "|default:"—" }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align:center;color:var(--muted);padding:30px;">
+                                        No tables found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                localStorage.setItem('waraykita_sidebar_collapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+            }
+        }
+
+        (function() {
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar && window.innerWidth > 768) {
+                var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                if (saved === '1') {
+                    sidebar.classList.add('collapsed');
+                } else if (saved === '0') {
+                    sidebar.classList.remove('collapsed');
+                }
+            }
+        })();
+
+        function toggleDropdown(id, el) {
+            document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                if (d.id !== id) d.classList.remove('show');
+            });
+            const dd = document.getElementById(id);
+            if (dd) dd.classList.toggle('show');
+        }
+
+        function clearNotifications() {
+            const items = document.querySelectorAll('#notifList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All notifications marked as read');
+        }
+
+        function clearMessages() {
+            const items = document.querySelectorAll('#msgList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('msgBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All messages marked as read');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                    d.classList.remove('show');
+                });
+            }
+        });
+
+        function showToast(msg) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + msg;
+            toast.style.cssText = 'position:fixed;bottom:30px;right:30px;background:var(--success);color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:10px;animation:fadeInUp 0.3s ease-out;';
+            document.body.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,417 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Roles | Waray Kita</title>
+    <style id="custom-theme-styles"></style>
+    <script>
+        // Load saved theme from localStorage and apply globally
+        (function() {
+            var theme = JSON.parse(localStorage.getItem('waraykita_theme'));
+            if (theme) {
+                function darken(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.max((n>>16)-a,0),G=Math.max((n>>8&0x00FF)-a,0),B=Math.max((n&0x0000FF)-a,0); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                function lighten(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.min((n>>16)+a,255),G=Math.min((n>>8&0x00FF)+a,255),B=Math.min((n&0x0000FF)+a,255); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                var s = document.getElementById('custom-theme-styles');
+                if (s) s.textContent = ':root{--primary:'+theme.primary+'!important;--primary-dark:'+darken(theme.primary,15)+'!important;--sidebar:'+theme.sidebar+'!important;--sidebar-hover:'+lighten(theme.sidebar,15)+'!important;--success:'+theme.success+'!important;--danger:'+theme.danger+'!important;}.welcome-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.hero-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.btn-primary:hover{box-shadow:0 6px 15px '+theme.primary+'4D!important;}';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <script>
+                // Apply saved collapsed state instantly, skipping the expand->collapse animation
+                (function() {
+                    var sb = document.getElementById('sidebar');
+                    if (sb && window.innerWidth > 768) {
+                        var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                        var shouldCollapse = (saved === '1' || saved === 'true');
+                        // Disable transition so the sidebar does not animate on page load
+                        sb.style.transition = 'none';
+                        if (shouldCollapse) {
+                            sb.classList.add('collapsed');
+                        } else {
+                            sb.classList.remove('collapsed');
+                        }
+                        // Force reflow, then re-enable transitions for future toggles
+                        void sb.offsetWidth;
+                        sb.style.transition = '';
+                    }
+                })();
+            </script>
+            <div class="sidebar-header">
+                <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
+                <h2>Waray<span>Kita</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <p class="nav-label">Main</p>
+                <a href="{% url 'admin_dashboard' %}" data-title="Dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="{% url 'manage_users' %}" data-title="Users"><i class="fa-solid fa-users"></i> Users</a>
+                <a href="{% url 'manage_items' %}" data-title="Items"><i class="fa-solid fa-box"></i> Items</a>
+                <a href="{% url 'reports' %}" data-title="Reports"><i class="fa-solid fa-chart-line"></i> Reports</a>
+                <p class="nav-label">Management</p>
+                <a href="{% url 'manage_roles' %}" class="active" data-title="Roles"><i class="fa-solid fa-shield-halved"></i> Roles</a>
+                <a href="{% url 'admin_settings' %}" data-title="Settings"><i class="fa-solid fa-gear"></i> Settings</a>
+<a href="{% url 'database' %}" data-title="Database"><i class="fa-solid fa-database"></i> Database</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <div class="avatar">{{ request.user.username|first|upper }}</div>
+                    <div class="info">
+                        <p>{{ request.user.username }}</p>
+                        <small>Administrator</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Topbar -->
+            <header class="topbar">
+                <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                <h1>Manage Roles</h1>
+<div class="topbar-right">
+                    <div class="icon-btn" onclick="toggleDropdown('notifDropdown', this)">
+                        <i class="fa-solid fa-bell"></i><span class="badge" id="notifBadge">5</span>
+                        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-bell"></i> Notifications</h4>
+                                <button class="notif-clear" onclick="clearNotifications()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="notifList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-user-plus"></i></div>
+                                    <div class="notif-content">
+                                        <p>New user registered</p>
+                                        <small>2 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-check"></i></div>
+                                    <div class="notif-content">
+                                        <p>Item approved</p>
+                                        <small>15 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                    <div class="notif-content">
+                                        <p>Report submitted</p>
+                                        <small>1 hour ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon red"><i class="fa-solid fa-box"></i></div>
+                                    <div class="notif-content">
+                                        <p>Product out of stock</p>
+                                        <small>3 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more notifications');">View All Notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-btn" onclick="toggleDropdown('msgDropdown', this)">
+                        <i class="fa-solid fa-envelope"></i><span class="badge" id="msgBadge">3</span>
+                        <div class="notif-dropdown" id="msgDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-envelope"></i> Messages</h4>
+                                <button class="notif-clear" onclick="clearMessages()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="msgList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-headset"></i></div>
+                                    <div class="notif-content">
+                                        <p>Support: Your ticket #1024 was resolved</p>
+                                        <small>10 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-user"></i></div>
+                                    <div class="notif-content">
+                                        <p>New inquiry from juan@gmail.com</p>
+                                        <small>32 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-bell"></i></div>
+                                    <div class="notif-content">
+                                        <p>System update scheduled tonight</p>
+                                        <small>2 hours ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon red"><i class="fa-solid fa-exclamation"></i></div>
+                                    <div class="notif-content">
+                                        <p>Payment issue reported by a user</p>
+                                        <small>Yesterday</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more messages');">View All Messages</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Alert Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div class="dashboard-alert success">
+                                <i class="fa-solid fa-circle-check"></i> {{ message }}
+                            </div>
+                        {% elif message.tags == 'error' %}
+                            <div class="dashboard-alert error">
+                                <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h2><i class="fa-solid fa-shield-halved"></i> Roles & Permissions</h2>
+                </div>
+
+                <!-- Role Summary Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fa-solid fa-crown"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ superuser_count }}</h3>
+                            <p>Superusers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fa-solid fa-user-tie"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ staff_count }}</h3>
+                            <p>Staff</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fa-solid fa-user"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ regular_count }}</h3>
+                            <p>Regular Users</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Description -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-circle-info"></i> Role Overview</h3>
+                    </div>
+                    <div class="two-col" style="grid-template-columns:1fr 1fr;">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-crown" style="color:var(--warning);"></i> Superuser</label>
+                            <p style="font-size:14px;color:var(--muted);line-height:1.6;">Full access to the entire system. Superusers can manage all users, roles, items, and settings. They have the highest level of permissions.</p>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-user-tie" style="color:var(--success);"></i> Staff</label>
+                            <p style="font-size:14px;color:var(--muted);line-height:1.6;">Staff members can access the admin dashboard and perform management tasks (users, items, reports, settings). They do not have superuser-level privileges.</p>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-user" style="color:var(--primary);"></i> Regular User</label>
+                            <p style="font-size:14px;color:var(--muted);line-height:1.6;">Standard users with access to the user dashboard only. They can browse products, manage favorites, and update their own profile.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users by Role Table -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>All Users by Role</h3>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Current Role</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in users %}
+                                <tr>
+                                    <td>{{ u.id }}</td>
+                                    <td>
+                                        <strong>{{ u.username }}</strong>
+                                        {% if u.id == request.user.id %}
+                                            <span class="status-badge active" style="margin-left:6px;">You</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ u.email|default:"—" }}</td>
+                                    <td>
+                                        {% if u.is_superuser %}
+                                            <span class="status-badge pending"><i class="fa-solid fa-crown"></i> Superuser</span>
+                                        {% elif u.is_staff %}
+                                            <span class="status-badge pending"><i class="fa-solid fa-user-tie"></i> Staff</span>
+                                        {% else %}
+                                            <span class="status-badge active"><i class="fa-solid fa-user"></i> User</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if u.is_active %}
+                                            <span class="status-badge active">Active</span>
+                                        {% else %}
+                                            <span class="status-badge inactive">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-btns">
+                                            {% if u.id == request.user.id and request.user.is_superuser %}
+                                                <span style="font-size:12px;color:var(--muted);">—</span>
+                                            {% else %}
+                                                {% if not u.is_superuser and not u.is_staff %}
+                                                    <form action="{% url 'manage_roles' %}" method="post" style="display:inline;">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="make_staff">
+                                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                                        <button type="submit" class="btn-sm btn-edit" title="Promote to Staff">
+                                                            <i class="fa-solid fa-user-tie"></i> Make Staff
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                                {% if not u.is_superuser %}
+                                                    <form action="{% url 'manage_roles' %}" method="post" style="display:inline;" onsubmit="return confirm('Promote {{ u.username }} to Superuser? This grants full system access.');">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="make_superuser">
+                                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                                        <button type="submit" class="btn-sm btn-toggle" title="Promote to Superuser">
+                                                            <i class="fa-solid fa-crown"></i> Make Superuser
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                                {% if u.is_superuser or u.is_staff %}
+                                                    <form action="{% url 'manage_roles' %}" method="post" style="display:inline;" onsubmit="return confirm('Demote {{ u.username }} to a regular user?');">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="make_user">
+                                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                                        <button type="submit" class="btn-sm btn-danger" title="Demote to Regular User">
+                                                            <i class="fa-solid fa-user"></i> Make User
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" style="text-align:center;color:var(--muted);padding:30px;">
+                                        No users found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+<script>
+function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            if (window.innerWidth <= 768) {
+                // Mobile: slide off-canvas sidebar in/out
+                sidebar.classList.toggle('open');
+            } else {
+                // Desktop: expand / minimize (collapse) the sidebar
+                sidebar.classList.toggle('collapsed');
+                // Save sidebar state to localStorage
+                localStorage.setItem('waraykita_sidebar_collapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+            }
+        }
+
+        // Restore sidebar state on page load
+        (function() {
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar && window.innerWidth > 768) {
+                var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                if (saved === '1') {
+                    sidebar.classList.add('collapsed');
+                } else if (saved === '0') {
+                    sidebar.classList.remove('collapsed');
+                }
+            }
+        })();
+
+        // ============================================================
+        // Notification & Message Dropdowns
+        // ============================================================
+        function toggleDropdown(id, el) {
+            document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                if (d.id !== id) d.classList.remove('show');
+            });
+            const dd = document.getElementById(id);
+            if (dd) dd.classList.toggle('show');
+        }
+
+        function clearNotifications() {
+            const items = document.querySelectorAll('#notifList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All notifications marked as read');
+        }
+
+        function clearMessages() {
+            const items = document.querySelectorAll('#msgList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('msgBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All messages marked as read');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                    d.classList.remove('show');
+                });
+            }
+        });
+
+        // ============================================================
+        // Toast Notification
+        // ============================================================
+        function showToast(msg) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + msg;
+            toast.style.cssText = 'position:fixed;bottom:30px;right:30px;background:var(--success);color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:10px;animation:fadeInUp 0.3s ease-out;';
+            document.body.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

@@ -149,6 +149,91 @@ body {
     color: rgba(255, 255, 255, 0.5);
 }
 
+/* Collapsed sidebar (desktop minimize) */
+.sidebar.collapsed {
+    width: 72px;
+    overflow: visible;
+}
+
+.sidebar.collapsed .sidebar-header {
+    padding: 25px 0;
+    justify-content: center;
+    gap: 0;
+}
+
+.sidebar.collapsed .sidebar-header h2 {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-nav {
+    padding: 20px 0;
+}
+
+.sidebar.collapsed .sidebar-nav .nav-label {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-nav a {
+    justify-content: center;
+    padding: 15px 0;
+    gap: 0;
+    position: relative;
+    font-size: 0;
+    line-height: 0;
+}
+
+.sidebar.collapsed .sidebar-nav a:hover,
+.sidebar.collapsed .sidebar-nav a.active {
+    padding-left: 0;
+}
+
+.sidebar.collapsed .sidebar-nav a i {
+    font-size: 20px;
+    width: 20px;
+    margin: 0;
+}
+
+/* Tooltip on hover for collapsed sidebar links */
+.sidebar.collapsed .sidebar-nav a span {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-nav a:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 12px;
+    background: #1e2a45;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 200;
+    pointer-events: none;
+}
+
+.sidebar.collapsed .sidebar-footer {
+    padding: 20px 0;
+}
+
+.sidebar.collapsed .sidebar-footer .user-mini {
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-footer .user-mini .info {
+    display: none;
+}
+
+/* Adjust main content when sidebar is collapsed */
+.sidebar.collapsed + .main {
+    margin-left: 72px;
+}
+
 /* Main content */
 .main {
     flex: 1;
@@ -156,6 +241,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    transition: margin-left 0.3s ease;
 }
 
 .topbar {
@@ -175,7 +261,15 @@ body {
     font-size: 22px;
     cursor: pointer;
     color: var(--text);
-    display: none;
+    display: block;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.topbar .menu-toggle:hover {
+    background: #eef2ff;
+    color: var(--primary);
 }
 
 .topbar h1 {
@@ -1057,29 +1151,33 @@ table tr:hover td {
     position: absolute;
     top: 10px;
     right: 10px;
-    width: 36px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.9);
+    width: 34px;
+    height: 34px;
+    background: #ffffff;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    color: #ccc;
+    font-size: 16px;
+    line-height: 1;
+    padding-top: 1px;
+    color: #e74c3c;
     cursor: pointer;
     transition: 0.3s;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 2;
 }
 
 .fav-toggle:hover {
     background: #fff;
     color: var(--danger);
     transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .fav-toggle.fav-active {
     color: var(--danger);
+    background: #fff;
     animation: heartPop 0.4s ease-out;
 }
 

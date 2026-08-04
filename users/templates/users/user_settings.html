@@ -12,21 +12,21 @@
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
                 <h2>Waray<span>Kita</span></h2>
             </div>
             <nav class="sidebar-nav">
                 <p class="nav-label">Main</p>
-                <a href="{% url 'user_dashboard' %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-                <a href="#"><i class="fa-solid fa-house"></i> Home</a>
-                <a href="#"><i class="fa-solid fa-compass"></i> Explore</a>
-                <a href="#"><i class="fa-solid fa-heart"></i> Favorites</a>
+                <a href="{% url 'user_dashboard' %}" data-title="Dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="#" data-title="Home"><i class="fa-solid fa-house"></i> Home</a>
+                <a href="#" data-title="Explore"><i class="fa-solid fa-compass"></i> Explore</a>
+                <a href="#" data-title="Favorites"><i class="fa-solid fa-heart"></i> Favorites</a>
                 <p class="nav-label">Account</p>
-                <a href="#"><i class="fa-solid fa-user"></i> Profile</a>
-                <a href="{% url 'user_settings' %}" class="active"><i class="fa-solid fa-gear"></i> Settings</a>
-                <a href="#"><i class="fa-solid fa-circle-question"></i> Help</a>
+                <a href="#" data-title="Profile"><i class="fa-solid fa-user"></i> Profile</a>
+                <a href="{% url 'user_settings' %}" class="active" data-title="Settings"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="#" data-title="Help"><i class="fa-solid fa-circle-question"></i> Help</a>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-mini">
@@ -379,9 +379,37 @@
     </style>
 
     <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
+function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            if (window.innerWidth <= 768) {
+                // Mobile: slide off-canvas sidebar in/out
+                sidebar.classList.toggle('open');
+            } else {
+                // Desktop: expand / minimize (collapse) the sidebar
+                sidebar.classList.toggle('collapsed');
+                // Save sidebar state to localStorage
+                localStorage.setItem('waraykita_sidebar_collapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+            }
         }
+
+// Restore sidebar state on page load (skip animation to prevent flash)
+        (function() {
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar && window.innerWidth > 768) {
+                var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                var shouldCollapse = (saved === '1' || saved === 'true');
+                // Disable transition so the sidebar does not animate on page load
+                sidebar.style.transition = 'none';
+                if (shouldCollapse) {
+                    sidebar.classList.add('collapsed');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                }
+                // Force reflow, then re-enable transitions for future toggles
+                void sidebar.offsetWidth;
+                sidebar.style.transition = '';
+            }
+        })();
 
         // Color Theme — applies globally to the whole system via :root
         function applyColorTheme() {

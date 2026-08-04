@@ -1,0 +1,547 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports | Waray Kita</title>
+    <style id="custom-theme-styles"></style>
+    <script>
+        // Load saved theme from localStorage and apply globally
+        (function() {
+            var theme = JSON.parse(localStorage.getItem('waraykita_theme'));
+            if (theme) {
+                function darken(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.max((n>>16)-a,0),G=Math.max((n>>8&0x00FF)-a,0),B=Math.max((n&0x0000FF)-a,0); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                function lighten(h, p) { var n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p),R=Math.min((n>>16)+a,255),G=Math.min((n>>8&0x00FF)+a,255),B=Math.min((n&0x0000FF)+a,255); return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1); }
+                var s = document.getElementById('custom-theme-styles');
+                if (s) s.textContent = ':root{--primary:'+theme.primary+'!important;--primary-dark:'+darken(theme.primary,15)+'!important;--sidebar:'+theme.sidebar+'!important;--sidebar-hover:'+lighten(theme.sidebar,15)+'!important;--success:'+theme.success+'!important;--danger:'+theme.danger+'!important;}.welcome-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.hero-banner{background:linear-gradient(135deg,'+theme.primary+','+darken(theme.primary,15)+')!important;}.btn-primary:hover{box-shadow:0 6px 15px '+theme.primary+'4D!important;}';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+            <script>
+                // Apply saved collapsed state instantly, skipping the expand->collapse animation
+                (function() {
+                    var sb = document.getElementById('sidebar');
+                    if (sb && window.innerWidth > 768) {
+                        var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                        var shouldCollapse = (saved === '1' || saved === 'true');
+                        // Disable transition so the sidebar does not animate on page load
+                        sb.style.transition = 'none';
+                        if (shouldCollapse) {
+                            sb.classList.add('collapsed');
+                        } else {
+                            sb.classList.remove('collapsed');
+                        }
+                        // Force reflow, then re-enable transitions for future toggles
+                        void sb.offsetWidth;
+                        sb.style.transition = '';
+                    }
+                })();
+            </script>
+            <div class="sidebar-header">
+                <div class="logo"><img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita"></div>
+                <h2>Waray<span>Kita</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <p class="nav-label">Main</p>
+<a href="{% url 'admin_dashboard' %}" data-title="Dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <a href="{% url 'manage_users' %}" data-title="Users"><i class="fa-solid fa-users"></i> Users</a>
+                <a href="{% url 'manage_items' %}" data-title="Items"><i class="fa-solid fa-box"></i> Items</a>
+                <a href="{% url 'reports' %}" class="active" data-title="Reports"><i class="fa-solid fa-chart-line"></i> Reports</a>
+                <p class="nav-label">Management</p>
+<a href="{% url 'manage_roles' %}" data-title="Roles"><i class="fa-solid fa-shield-halved"></i> Roles</a>
+                <a href="{% url 'admin_settings' %}" data-title="Settings"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="{% url 'database' %}" data-title="Database"><i class="fa-solid fa-database"></i> Database</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <div class="avatar">{{ user.username|first|upper }}</div>
+                    <div class="info">
+                        <p>{{ user.username }}</p>
+                        <small>Administrator</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Topbar -->
+            <header class="topbar">
+                <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                <h1>Reports</h1>
+                <div class="topbar-right">
+                    <div class="icon-btn" onclick="toggleDropdown('notifDropdown', this)">
+                        <i class="fa-solid fa-bell"></i><span class="badge" id="notifBadge">5</span>
+                        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-bell"></i> Notifications</h4>
+                                <button class="notif-clear" onclick="clearNotifications()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="notifList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-user-plus"></i></div>
+                                    <div class="notif-content">
+                                        <p>New user registered</p>
+                                        <small>2 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-check"></i></div>
+                                    <div class="notif-content">
+                                        <p>Item approved</p>
+                                        <small>15 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                    <div class="notif-content">
+                                        <p>Report submitted</p>
+                                        <small>1 hour ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon red"><i class="fa-solid fa-box"></i></div>
+                                    <div class="notif-content">
+                                        <p>Product out of stock</p>
+                                        <small>3 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more notifications');">View All Notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-btn" onclick="toggleDropdown('msgDropdown', this)">
+                        <i class="fa-solid fa-envelope"></i><span class="badge" id="msgBadge">3</span>
+                        <div class="notif-dropdown" id="msgDropdown" onclick="event.stopPropagation()">
+                            <div class="notif-dropdown-header">
+                                <h4><i class="fa-solid fa-envelope"></i> Messages</h4>
+                                <button class="notif-clear" onclick="clearMessages()">Mark all read</button>
+                            </div>
+                            <div class="notif-list" id="msgList">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon blue"><i class="fa-solid fa-headset"></i></div>
+                                    <div class="notif-content">
+                                        <p>Support: Your ticket #1024 was resolved</p>
+                                        <small>10 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon green"><i class="fa-solid fa-user"></i></div>
+                                    <div class="notif-content">
+                                        <p>New inquiry from juan@gmail.com</p>
+                                        <small>32 minutes ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon orange"><i class="fa-solid fa-bell"></i></div>
+                                    <div class="notif-content">
+                                        <p>System update scheduled tonight</p>
+                                        <small>2 hours ago</small>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon red"><i class="fa-solid fa-exclamation"></i></div>
+                                    <div class="notif-content">
+                                        <p>Payment issue reported by a user</p>
+                                        <small>Yesterday</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="event.preventDefault(); showToast('No more messages');">View All Messages</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{% url 'logout' %}"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Alert Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div class="dashboard-alert success">
+                                <i class="fa-solid fa-circle-check"></i> {{ message }}
+                            </div>
+                        {% elif message.tags == 'error' %}
+                            <div class="dashboard-alert error">
+                                <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h2><i class="fa-solid fa-chart-line"></i> Reports & Analytics</h2>
+                    <button class="btn-secondary" onclick="window.print()">
+                        <i class="fa-solid fa-print"></i> Print Report
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ total_users }}</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fa-solid fa-box"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ total_items }}</h3>
+                            <p>Total Items</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fa-solid fa-user-check"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ active_users }}</h3>
+                            <p>Active Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fa-solid fa-box-open"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ active_items }}</h3>
+                            <p>Active Items</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fa-solid fa-boxes-stacked"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ in_stock_items }}</h3>
+                            <p>In Stock</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fa-solid fa-box-open"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ out_of_stock_items }}</h3>
+                            <p>Out of Stock</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fa-solid fa-coins"></i></div>
+                        <div class="stat-info">
+                            <h3>₱{{ inventory_value|floatformat:2 }}</h3>
+                            <p>Inventory Value</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fa-solid fa-user-slash"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ inactive_users }}</h3>
+                            <p>Inactive Users</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Two Column: Breakdowns -->
+                <div class="two-col">
+                    <!-- User Breakdown -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-users"></i> Users Breakdown</h3>
+                        </div>
+                        <div class="breakdown-list">
+                            {% for b in role_breakdown %}
+                            <div class="breakdown-item">
+                                <span>{{ b.label }}</span>
+                                <span class="breakdown-count">{{ b.count }}</span>
+                            </div>
+                            {% endfor %}
+                            {% for b in user_status_breakdown %}
+                            <div class="breakdown-item">
+                                <span>{{ b.label }} Users</span>
+                                <span class="breakdown-count">{{ b.count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Stock Breakdown -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-boxes-stacked"></i> Stock Breakdown</h3>
+                        </div>
+                        <div class="breakdown-list">
+                            {% for b in stock_breakdown %}
+                            <div class="breakdown-item">
+                                <span>{{ b.label }}</span>
+                                <span class="breakdown-count">{{ b.count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Two Column: Color Breakdown & Top Products -->
+                <div class="two-col">
+                    <!-- Color Breakdown -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-palette"></i> Items by Color</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Color</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in color_breakdown %}
+                                    <tr>
+                                        <td>{{ c.color_variant|default:"Unspecified" }}</td>
+                                        <td>{{ c.count }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="2" style="text-align:center;color:var(--muted);padding:20px;">No color data available.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Top Products -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-trophy"></i> Top Products by Stock</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in top_products %}
+                                    <tr>
+                                        <td><strong>{{ p.title }}</strong></td>
+                                        <td>{{ p.stock }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="2" style="text-align:center;color:var(--muted);padding:20px;">No products available.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Users -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-user-clock"></i> Recent Users</h3>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in recent_users %}
+                                <tr>
+                                    <td><strong>{{ u.username }}</strong></td>
+                                    <td>{{ u.email|default:"—" }}</td>
+                                    <td>
+                                        {% if u.is_superuser %}
+                                            <span class="status-badge pending">Superuser</span>
+                                        {% elif u.is_staff %}
+                                            <span class="status-badge pending">Staff</span>
+                                        {% else %}
+                                            <span class="status-badge active">User</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if u.is_active %}
+                                            <span class="status-badge active">Active</span>
+                                        {% else %}
+                                            <span class="status-badge inactive">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No users yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Items -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-box"></i> Recent Items</h3>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Color</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for it in recent_items %}
+                                <tr>
+                                    <td><strong>{{ it.title }}</strong></td>
+                                    <td>₱{{ it.price }}</td>
+                                    <td>{{ it.stock }}</td>
+                                    <td>{{ it.color_variant|default:"—" }}</td>
+                                    <td>
+                                        {% if it.is_active %}
+                                            <span class="status-badge active">Active</span>
+                                        {% else %}
+                                            <span class="status-badge inactive">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">No items yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <style>
+        .breakdown-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f4f6fb;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        .breakdown-item .breakdown-count {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 18px;
+        }
+    </style>
+
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            if (window.innerWidth < 768) {
+                sidebar.classList.toggle('open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                // Save sidebar state to localStorage
+                localStorage.setItem('waraykita_sidebar_collapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+            }
+        }
+
+        // Restore sidebar state on page load
+        (function() {
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar && window.innerWidth > 768) {
+                var saved = localStorage.getItem('waraykita_sidebar_collapsed');
+                if (saved === '1') {
+                    sidebar.classList.add('collapsed');
+                } else if (saved === '0') {
+                    sidebar.classList.remove('collapsed');
+                }
+            }
+        })();
+
+        // ============================================================
+        // Notification & Message Dropdowns
+        // ============================================================
+        function toggleDropdown(id, el) {
+            document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                if (d.id !== id) d.classList.remove('show');
+            });
+            const dd = document.getElementById(id);
+            if (dd) dd.classList.toggle('show');
+        }
+
+        function clearNotifications() {
+            const items = document.querySelectorAll('#notifList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All notifications marked as read');
+        }
+
+        function clearMessages() {
+            const items = document.querySelectorAll('#msgList .notif-item');
+            items.forEach(function(item) { item.classList.remove('unread'); });
+            const badge = document.getElementById('msgBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('All messages marked as read');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.notif-dropdown').forEach(function(d) {
+                    d.classList.remove('show');
+                });
+            }
+        });
+
+        // ============================================================
+        // Toast Notification
+        // ============================================================
+        function showToast(msg) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + msg;
+            toast.style.cssText = 'position:fixed;bottom:30px;right:30px;background:var(--success);color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:10px;animation:fadeInUp 0.3s ease-out;';
+            document.body.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
