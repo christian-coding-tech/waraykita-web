@@ -3,8 +3,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard | Waray Kita</title>
     <style id="custom-theme-styles"></style>
@@ -22,6 +23,17 @@
     </script>
 </head>
 <body>
+    <!-- ============================================================ -->
+    <!-- System Loading Overlay -->
+    <!-- ============================================================ -->
+    <div class="system-loader" id="systemLoader">
+        <div class="loader-logo">
+            <img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita">
+        </div>
+        <div class="loader-ring"></div>
+        <p>Loading...</p>
+    </div>
+
     <div class="dashboard">
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
@@ -305,6 +317,49 @@
                     </div>
                 </div>
 
+<!-- Analytics Charts -->
+                <div class="two-col charts-row">
+                    <!-- User Roles Pie Chart -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-chart-pie"></i> User Roles Distribution</h3>
+                        </div>
+                        <div class="chart-wrap">
+                            <canvas id="rolesPieChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Products by Color Bar Chart -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-chart-column"></i> Products by Color</h3>
+                        </div>
+                        <div class="chart-wrap">
+                            <canvas id="colorBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- User Status Donut Chart -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-circle-half-stroke"></i> User Status</h3>
+                        </div>
+                        <div class="chart-wrap">
+                            <canvas id="statusDonutChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Stock Status Bar Chart -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-boxes-stacked"></i> Stock Status</h3>
+                        </div>
+                        <div class="chart-wrap">
+                            <canvas id="stockBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Quick Actions -->
                 <div class="panel">
                     <div class="panel-header">
@@ -333,7 +388,135 @@
         </div>
     </div>
 
-    <script>
+<script>
+        // ============================================================
+        // Chart.js Analytics Charts
+        // ============================================================
+        function renderCharts() {
+            if (typeof Chart === 'undefined') return;
+
+            Chart.defaults.font.family = '"Poppins", sans-serif';
+            Chart.defaults.color = '#888';
+
+            // User Roles Pie Chart
+            var rolesCtx = document.getElementById('rolesPieChart');
+            if (rolesCtx) {
+                new Chart(rolesCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Superuser', 'Staff', 'Regular'],
+                        datasets: [{
+                            data: [{{ superuser_count }}, {{ staff_count }}, {{ regular_count }}],
+                            backgroundColor: ['#e74c3c', '#f39c12', '#7494ec'],
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+                        }
+                    }
+                });
+            }
+
+            // Products by Color Bar Chart
+            var colorCtx = document.getElementById('colorBarChart');
+            if (colorCtx) {
+                new Chart(colorCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: {{ color_labels|safe }},
+                        datasets: [{
+                            label: 'Products',
+                            data: {{ color_counts|safe }},
+                            backgroundColor: ['#7494ec', '#e74c3c', '#2ecc71', '#f39c12', '#8e44ad', '#3498db', '#1abc9c', '#d35400'],
+                            borderRadius: 8,
+                            barPercentage: 0.7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // User Status Donut Chart
+            var statusCtx = document.getElementById('statusDonutChart');
+            if (statusCtx) {
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Inactive'],
+                        datasets: [{
+                            data: [{{ active_users }}, {{ inactive_users }}],
+                            backgroundColor: ['#2ecc71', '#e74c3c'],
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+                        }
+                    }
+                });
+            }
+
+            // Stock Status Bar Chart
+            var stockCtx = document.getElementById('stockBarChart');
+            if (stockCtx) {
+                new Chart(stockCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['In Stock', 'Out of Stock'],
+                        datasets: [{
+                            label: 'Items',
+                            data: [{{ in_stock }}, {{ out_of_stock }}],
+                            backgroundColor: ['#2ecc71', '#e74c3c'],
+                            borderRadius: 8,
+                            barPercentage: 0.5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Hide the system loading overlay when everything is loaded
+        window.addEventListener('load', function() {
+            var loader = document.getElementById('systemLoader');
+            if (loader) {
+                setTimeout(function() { loader.classList.add('hide'); }, 400);
+            }
+            renderCharts();
+        });
+
 function toggleSidebar() {
             var sidebar = document.getElementById('sidebar');
             if (window.innerWidth <= 768) {

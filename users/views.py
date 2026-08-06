@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Count, Sum
 from django.db import connection
 from .models import Item, Profile
@@ -105,6 +105,36 @@ def logout_view(request):
     return redirect("login")
 
 
+# ============================================================
+# Ajax availability checks (used by the registration form)
+# ============================================================
+
+@require_POST
+def check_username_view(request):
+    """Return availability of a username as JSON."""
+    username = request.POST.get("username", "").strip()
+    if not username:
+        return JsonResponse({"available": False, "message": "Username is required."})
+    if User.objects.filter(username__iexact=username).exists():
+        return JsonResponse({"available": False, "message": "This username is already taken."})
+    if len(username) < 3:
+        return JsonResponse({"available": False, "message": "Username must be at least 3 characters."})
+    if not username.isalnum() and not all(c in username for c in "._-"):
+        return JsonResponse({"available": False, "message": "Only letters, numbers, dots, underscores and hyphens are allowed."})
+    return JsonResponse({"available": True, "message": "Username is available."})
+
+
+@require_POST
+def check_email_view(request):
+    """Return whether an email is already registered as JSON."""
+    email = request.POST.get("email", "").strip().lower()
+    if not email:
+        return JsonResponse({"available": False, "message": "Email is required."})
+    if User.objects.filter(email__iexact=email).exists():
+        return JsonResponse({"available": False, "message": "This email is already registered."})
+    return JsonResponse({"available": True, "message": "Email is available."})
+
+
 @login_required(login_url="login")
 def admin_dashboard_view(request):
     """Admin dashboard for superuser/staff accounts."""
@@ -120,11 +150,34 @@ def admin_dashboard_view(request):
 # Activity rate = percentage of active users
     activity_rate = round((active_users / total_users * 100), 1) if total_users > 0 else 0
 
-    # "Reports" placeholder — count of inactive items as a proxy metric
+# "Reports" placeholder — count of inactive items as a proxy metric
     inactive_items = Item.objects.filter(is_active=False).count()
 
     # Recent users (latest 5)
     recent_users = User.objects.all().order_by("-date_joined")[:5]
+
+    # --- Chart data ---
+    # User roles breakdown (for pie chart)
+    superuser_count = User.objects.filter(is_superuser=True).count()
+    staff_count = User.objects.filter(is_staff=True, is_superuser=False).count()
+    regular_count = User.objects.filter(is_staff=False, is_superuser=False).count()
+
+    # User status breakdown (for donut chart)
+    active_users = User.objects.filter(is_active=True).count()
+    inactive_users = User.objects.filter(is_active=False).count()
+
+    # Product color breakdown (for bar chart)
+    color_breakdown = (
+        Item.objects.values("color_variant")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+    color_labels = [c["color_variant"] or "Unspecified" for c in color_breakdown]
+    color_counts = [c["count"] for c in color_breakdown]
+
+    # Stock status breakdown (for bar/donut)
+    in_stock = Item.objects.filter(stock__gt=0).count()
+    out_of_stock = Item.objects.filter(stock=0).count()
 
     context = {
         "user": request.user,
@@ -134,6 +187,16 @@ def admin_dashboard_view(request):
         "activity_rate": activity_rate,
         "reports_count": inactive_items,
         "recent_users": recent_users,
+        # Chart data
+        "superuser_count": superuser_count,
+        "staff_count": staff_count,
+        "regular_count": regular_count,
+        "active_users": active_users,
+        "inactive_users": inactive_users,
+        "color_labels": color_labels,
+        "color_counts": color_counts,
+        "in_stock": in_stock,
+        "out_of_stock": out_of_stock,
     }
     return render(request, "users/admin_dashboard.html", context)
 

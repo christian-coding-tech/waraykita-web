@@ -1274,29 +1274,339 @@ table tr:hover td {
     }
 }
 
+/* ============================================================ */
+/* Mobile Responsive — Rearranges UI for phones/tablets          */
+/* (Desktop layout above stays unchanged)                        */
+/* ============================================================ */
+
+/* Tablet portrait */
+@media (max-width: 992px) {
+    .content {
+        padding: 20px;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Phone */
 @media (max-width: 768px) {
+    body {
+        background: var(--bg);
+    }
+
+    /* Sidebar: full-width off-canvas drawer */
     .sidebar {
-        left: -260px;
+        width: 280px;
+        left: -280px;
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.2);
     }
 
     .sidebar.open {
         left: 0;
     }
 
-    .main {
-        margin-left: 0;
+    /* Overlay backdrop when sidebar is open on mobile */
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99;
     }
 
-    .topbar .menu-toggle {
+    .sidebar-backdrop.show {
         display: block;
     }
 
+    .main {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* Topbar: compact for mobile */
+    .topbar {
+        height: 60px;
+        padding: 0 14px;
+    }
+
+    .topbar h1 {
+        font-size: 17px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        margin-left: 6px;
+    }
+
+    .topbar .topbar-right {
+        gap: 12px;
+    }
+
+    .topbar .logout-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .topbar .logout-btn span {
+        display: none;
+    }
+
+    /* Content: reduce padding */
+    .content {
+        padding: 16px;
+    }
+
+    /* Notification dropdown: full width on mobile */
+    .notif-dropdown {
+        width: calc(100vw - 40px);
+        right: -60px;
+        position: fixed;
+        top: 60px;
+    }
+
+    /* Welcome banner: stack vertically, centered */
     .welcome-banner {
         flex-direction: column;
         text-align: center;
         gap: 15px;
+        padding: 24px 18px;
     }
-}  
+
+    .welcome-banner h2 {
+        font-size: 22px;
+    }
+
+    .welcome-banner .banner-icon {
+        font-size: 48px;
+    }
+
+    .welcome-banner .banner-logo {
+        display: none;
+    }
+
+    /* Hero banner */
+    .hero-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px 20px;
+    }
+
+    .hero-content h2 {
+        font-size: 24px;
+    }
+
+    .hero-icons {
+        margin-top: 20px;
+    }
+
+    /* Stats: single column on small phones */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .stat-card .stat-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+    }
+
+    .stat-card .stat-info h3 {
+        font-size: 20px;
+    }
+
+    .stat-card .stat-info p {
+        font-size: 12px;
+    }
+
+    /* Panels: reduce padding */
+    .panel {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .panel-header h3 {
+        font-size: 16px;
+    }
+
+    /* Products grid: 2 columns on phones */
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .product-img {
+        height: 120px;
+    }
+
+    .product-body {
+        padding: 12px;
+        gap: 6px;
+    }
+
+    .product-title {
+        font-size: 14px;
+    }
+
+    .product-price {
+        font-size: 16px;
+    }
+
+    .product-desc {
+        -webkit-line-clamp: 1;
+    }
+
+    .product-color {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+
+    /* Category grid */
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .category-card {
+        padding: 16px 10px;
+    }
+
+    .category-card i {
+        font-size: 24px;
+    }
+
+    .category-card span {
+        font-size: 12px;
+    }
+
+    /* Explore toolbar: stack filters */
+    .explore-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        min-width: 0;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    /* Quick actions */
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    /* Two column becomes single */
+    .two-col {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Tables: horizontal scroll on mobile */
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    /* Page header */
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    /* Form actions */
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn-primary,
+    .form-actions .btn-secondary {
+        width: 100%;
+    }
+
+    /* Avatar upload */
+    .avatar-upload {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .avatar-upload-input {
+        align-items: center;
+    }
+
+    /* FAQ */
+    .faq-question {
+        font-size: 14px;
+        padding: 14px;
+    }
+
+    /* Profile card */
+    .profile-card {
+        padding: 24px 16px;
+    }
+
+    /* Action buttons stack */
+    .action-btns {
+        flex-direction: column;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .topbar .topbar-right {
+        gap: 8px;
+    }
+
+    .topbar .icon-btn {
+        font-size: 17px;
+    }
+
+    .topbar .logout-btn {
+        display: none;
+    }
+
+    .welcome-banner h2 {
+        font-size: 20px;
+    }
+
+    .content {
+        padding: 12px;
+    }
+
+    .panel {
+        padding: 14px;
+    }
+}
 /* Logo image styles */  
 .sidebar-header .logo { overflow: hidden; flex-shrink: 0; }  
 .sidebar-header .logo img { width: 100%; height: 100%; object-fit: cover; }  
@@ -1560,4 +1870,172 @@ table tr:hover td {
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+}
+
+/* ============================================================ */
+/* System Loading Overlay */
+/* ============================================================ */
+.system-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #7494ec, #5a7ad6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.system-loader.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.system-loader .loader-logo {
+    width: 90px;
+    height: 90px;
+    background: #fff;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    animation: loaderPulse 1.5s ease-in-out infinite;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+.system-loader .loader-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.system-loader .loader-ring {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: loaderSpin 1s linear infinite;
+}
+.system-loader p {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 20px;
+    letter-spacing: 1px;
+}
+@keyframes loaderSpin {
+    to { transform: rotate(360deg); }
+}
+@keyframes loaderPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* ============================================================ */
+/* Analytics Charts (Admin Dashboard) */
+/* ============================================================ */
+.charts-row {
+    grid-template-columns: 1fr 1fr;
+}
+
+.charts-row .panel {
+    min-width: 0;
+}
+
+.chart-wrap {
+    position: relative;
+    height: 260px;
+    width: 100%;
+}
+
+/* ============================================================ */
+/* Mobile Sidebar Backdrop */
+/* ============================================================ */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 99;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.sidebar-backdrop.show {
+    display: block;
+    opacity: 1;
+}
+
+/* ============================================================ */
+/* System Loading Overlay */
+/* ============================================================ */
+.system-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #7494ec, #5a7ad6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.system-loader.hide {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.system-loader .loader-logo {
+    width: 90px;
+    height: 90px;
+    background: #fff;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    animation: loaderPulse 1.5s ease-in-out infinite;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.system-loader .loader-logo img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
+
+.system-loader .loader-ring {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.system-loader p {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 20px;
+    letter-spacing: 1px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes loaderPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
 }

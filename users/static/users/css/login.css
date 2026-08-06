@@ -78,6 +78,22 @@ form {
     display: flex;
     flex-direction: column;
     max-height: 100%;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.form-box.register form::-webkit-scrollbar {
+    width: 5px;
+}
+
+.form-box.register form::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.form-box.register form::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
 }
 
 .form-fields {
@@ -298,3 +314,582 @@ form {
 }  
 /* Toggle panel logo */  
 .toggle-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 15px; border-radius: 16px; } 
+
+/* ============================================================ */
+/* System Loading Overlay */
+/* ============================================================ */
+.system-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #e2e2e2, #c9d6ff);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.system-loader.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.loader-logo {
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 8px 30px rgba(116, 148, 236, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: loaderFloat 2s ease-in-out infinite;
+}
+.loader-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.loader-ring {
+    margin-top: 25px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 4px solid rgba(116, 148, 236, 0.2);
+    border-top-color: #7494ec;
+    animation: loaderSpin 0.9s linear infinite;
+}
+.system-loader p {
+    margin-top: 18px;
+    font-size: 15px;
+    color: #5a6b8c;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+@keyframes loaderSpin {
+    to { transform: rotate(360deg); }
+}
+@keyframes loaderFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+/* ============================================================ */
+/* Multi-Step Registration Styles */
+/* ============================================================ */
+.steps-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 15px 0 10px;
+}
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: #aaa;
+    transition: 0.3s;
+}
+.step .step-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: 0.3s;
+    color: #888;
+}
+.step span {
+    font-size: 11px;
+    font-weight: 500;
+}
+.step.active {
+    color: #7494ec;
+}
+.step.active .step-circle {
+    background: #7494ec;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(116, 148, 236, 0.4);
+    transform: scale(1.1);
+}
+.step-line {
+    width: 30px;
+    height: 3px;
+    background: #eee;
+    border-radius: 3px;
+    transition: 0.3s;
+    margin-top: -28px;
+}
+.step-line.active {
+    background: #7494ec;
+}
+.progress-track {
+    width: 100%;
+    height: 5px;
+    background: #eee;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #7494ec, #5a7ad6);
+    border-radius: 5px;
+    transition: width 0.4s ease;
+}
+
+/* Step panels */
+.step-panel {
+    display: none;
+}
+.step-panel.active {
+    display: block;
+    animation: fadeInUp 0.35s ease-out;
+}
+.step-panel .step-title {
+    font-size: 13px;
+    color: #5a6b8c;
+    font-weight: 600;
+    margin: 0 0 5px;
+    text-align: left;
+}
+.step-panel.exit-left {
+    animation: exitLeft 0.25s ease-in forwards;
+}
+.step-panel.exit-right {
+    animation: exitRight 0.25s ease-in forwards;
+}
+.step-panel.enter-right {
+    animation: enterRight 0.3s ease-out;
+}
+.step-panel.enter-left {
+    animation: enterLeft 0.3s ease-out;
+}
+@keyframes exitLeft {
+    to { opacity: 0; transform: translateX(-40px); }
+}
+@keyframes exitRight {
+    to { opacity: 0; transform: translateX(40px); }
+}
+@keyframes enterRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes enterLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Step nav buttons */
+.step-nav {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+.step-nav .btn {
+    flex: 1;
+    height: 44px;
+    font-size: 14px;
+}
+.btn-back {
+    background: #e0e0e0;
+    color: #555;
+    box-shadow: none;
+}
+.btn-back:hover {
+    background: #ccc;
+}
+.btn-next,
+.btn-submit {
+    background: #7494ec;
+}
+.btn-next:hover,
+.btn-submit:hover {
+    background: #5a7ad6;
+}
+
+/* ============================================================ */
+/* Field validation states */
+/* ============================================================ */
+.input-box.valid input {
+    border: 2px solid #2ecc71;
+    background: #f0fdf5;
+}
+.input-box.invalid input {
+    border: 2px solid #e74c3c;
+    background: #fef0f0;
+}
+.input-box .field-status {
+    right: 20px;
+    font-size: 18px;
+    opacity: 0;
+    transition: 0.2s;
+}
+.input-box.valid .field-status,
+.input-box.invalid .field-status {
+    opacity: 1;
+}
+.field-feedback {
+    font-size: 12px;
+    margin: -12px 0 8px;
+    text-align: left;
+    padding-left: 4px;
+    font-weight: 500;
+    min-height: 0;
+    transition: 0.2s;
+}
+.field-feedback.valid {
+    color: #1a9d52;
+}
+.field-feedback.invalid {
+    color: #d33;
+}
+
+/* ============================================================ */
+/* Password strength meter */
+/* ============================================================ */
+.password-strength {
+    margin: -8px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.strength-bar {
+    flex: 1;
+    height: 6px;
+    background: #eee;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.strength-bar span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: 6px;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+.strength-label {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ============================================================ */
+/* System Loading Overlay */
+/* ============================================================ */
+.system-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #7494ec, #5a7ad6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.system-loader.hide {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.system-loader .loader-logo {
+    width: 90px;
+    height: 90px;
+    background: #fff;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    animation: loaderPulse 1.5s ease-in-out infinite;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.system-loader .loader-logo img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
+
+.system-loader .loader-ring {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.system-loader p {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 20px;
+    letter-spacing: 1px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes loaderPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* ============================================================ */
+/* Multi-step Registration */
+/* ============================================================ */
+
+/* Progress indicator */
+.reg-progress {
+    margin-bottom: 20px;
+}
+
+.progress-track {
+    height: 6px;
+    background: #e6e9f2;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 18px;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #7494ec, #5a7ad6);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.progress-step.active {
+    opacity: 1;
+}
+
+.progress-step .step-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e6e9f2;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.progress-step.done .step-circle {
+    background: #2ecc71;
+    color: #fff;
+}
+
+.progress-step.active .step-circle {
+    background: #7494ec;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(116, 148, 236, 0.2);
+    transform: scale(1.05);
+}
+
+.progress-step span {
+    font-size: 11px;
+    font-weight: 500;
+    color: #666;
+}
+
+/* Step containers */
+.reg-step {
+    display: none;
+}
+
+.reg-step.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Slide animations */
+.slide-in-right {
+    animation: slideInRight 0.4s ease;
+}
+
+.slide-out-left {
+    animation: slideOutLeft 0.4s ease;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.4s ease;
+}
+
+.slide-out-right {
+    animation: slideOutRight 0.4s ease;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(60px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutLeft {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-60px); }
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-60px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(60px); }
+}
+
+/* Step title */
+.step-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px !important;
+    text-align: left;
+}
+
+/* Step navigation buttons */
+.step-nav {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.step-nav .btn {
+    flex: 1;
+}
+
+.step-nav .btn-back {
+    background: #e6e9f2;
+    color: #333;
+    box-shadow: none;
+}
+
+.step-nav .btn-back:hover {
+    background: #d6dae6;
+}
+
+/* ============================================================ */
+/* Field validation states */
+/* ============================================================ */
+.input-box input.valid {
+    border: 2px solid #2ecc71;
+    background: #f0fbf5;
+}
+
+.input-box input.invalid {
+    border: 2px solid #e74c3c;
+    background: #fdf0f0;
+}
+
+.field-feedback {
+    display: block;
+    font-size: 11px;
+    margin-top: 4px;
+    font-weight: 500;
+    min-height: 16px;
+    text-align: left;
+}
+
+.field-feedback.ok {
+    color: #2ecc71;
+}
+
+.field-feedback.err {
+    color: #e74c3c;
+}
+
+/* Availability check messages */
+.availability-check {
+    font-size: 12px;
+    margin-top: 4px;
+    text-align: left;
+    font-weight: 500;
+}
+
+.availability-check .checking {
+    color: #888;
+}
+
+.availability-check .ok {
+    color: #2ecc71;
+}
+
+.availability-check .err {
+    color: #e74c3c;
+}
+
+/* ============================================================ */
+/* Password strength meter */
+/* ============================================================ */
+.password-strength {
+    margin: -8px 0 12px;
+    text-align: left;
+}
+
+.strength-bars {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+
+.strength-bars span {
+    flex: 1;
+    height: 5px;
+    border-radius: 5px;
+    background: #e6e9f2;
+    transition: background 0.3s ease;
+}
+
+.strength-bars span.weak { background: #e74c3c; }
+.strength-bars span.fair { background: #f39c12; }
+.strength-bars span.good { background: #2ecc71; }
+.strength-bars span.strong { background: #27ae60; }
+
+.strength-label {
+    font-size: 11px;
+    color: #888;
+    font-weight: 500;
+}

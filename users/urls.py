@@ -2,8 +2,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.login_view, name="login"),
-    path("register/", views.register_view, name="register"),
+path("", views.login_view, name="login"),
+path("register/", views.register_view, name="register"),
+    # AJAX availability checks (registration form)
+    path("check-username/", views.check_username_view, name="check_username"),
+    path("check-email/", views.check_email_view, name="check_email"),
     path("admin-dashboard/", views.admin_dashboard_view, name="admin_dashboard"),
     path("user-dashboard/", views.user_dashboard_view, name="user_dashboard"),
     path("reports/", views.reports_view, name="reports"),

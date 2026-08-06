@@ -22,6 +22,19 @@
     </script>
 </head>
 <body>
+    <!-- ============================================================ -->
+    <!-- System Loading Overlay -->
+    <!-- ============================================================ -->
+    <div class="system-loader" id="systemLoader">
+        <div class="loader-logo">
+            <img src="{% static 'users/image/waray kita logo.png' %}" alt="Waray Kita">
+        </div>
+        <div class="loader-ring"></div>
+        <p>Loading...</p>
+    </div>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
     <div class="dashboard">
         <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
@@ -921,18 +934,39 @@
         </div>
     </div>
 
-    <script>
+<script>
+        // Hide the system loading overlay when everything is loaded
+        window.addEventListener('load', function() {
+            var loader = document.getElementById('systemLoader');
+            if (loader) {
+                setTimeout(function() { loader.classList.add('hide'); }, 400);
+            }
+        });
+
 function toggleSidebar() {
             var sidebar = document.getElementById('sidebar');
+            var backdrop = document.getElementById('sidebarBackdrop');
             if (window.innerWidth <= 768) {
                 // Mobile: slide off-canvas sidebar in/out
                 sidebar.classList.toggle('open');
+                if (sidebar.classList.contains('open')) {
+                    if (backdrop) backdrop.classList.add('show');
+                } else {
+                    if (backdrop) backdrop.classList.remove('show');
+                }
             } else {
                 // Desktop: expand / minimize (collapse) the sidebar
                 sidebar.classList.toggle('collapsed');
                 // Save sidebar state to localStorage
                 localStorage.setItem('waraykita_sidebar_collapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
             }
+        }
+
+        function closeMobileSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.remove('open');
+            if (backdrop) backdrop.classList.remove('show');
         }
 
         // Restore sidebar state on page load
